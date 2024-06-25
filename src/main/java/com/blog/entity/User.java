@@ -13,7 +13,7 @@ public class User {
 
     private String password;//用户密码
 
-    private String name;//用户名
+    private String name;//用户昵称
 
     private String headImg;//头像图片链接
 
