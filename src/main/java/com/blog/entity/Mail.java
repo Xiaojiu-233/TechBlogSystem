@@ -15,6 +15,8 @@ public class Mail {
 
     private String fromName;//来源用户名
 
+    private String title;//标题
+
     private String text;//文本
 
     private Integer isRead;//是否阅读 1已读 0未读

@@ -11,6 +11,8 @@ public class Blog {
 
     private Long userId;//用户id
 
+    private String title;//标题
+
     private String text;//文本
 
     private String images;//图片链接
