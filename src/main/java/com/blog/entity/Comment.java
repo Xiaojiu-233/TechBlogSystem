@@ -19,5 +19,7 @@ public class Comment {
 
     private String text;//文本
 
+    private Integer share;//分享数
+
     private LocalDateTime createTime;//创建时间
 }

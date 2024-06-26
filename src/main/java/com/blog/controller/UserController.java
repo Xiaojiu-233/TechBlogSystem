@@ -20,10 +20,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -123,7 +120,7 @@ public class UserController {
 
     //用户的id查询
     @GetMapping("/{id}")
-    @ApiOperation(value = "用户的分页查询", notes = "可以通过名字查询")
+    @ApiOperation(value = "用户的id查询", notes = "用户的id查询")
     public R<User> getById(@PathVariable("id")Long id){
         //正式执行
         log.info("正在执行用户的按id获取：{}",id);
@@ -166,7 +163,7 @@ public class UserController {
     @PostMapping("/upd")
     @ApiOperation(value = "修改指定id用户信息", notes = "修改自己的信息")
     public R<String> updateById( User user){
-        //管理员权限判定
+        //权限判定
         if(BaseContext.getIsAdmin() || !Objects.equals(BaseContext.getCurrentId(), user.getId()))
             return R.failure("该id不是你的用户id，你无权操作");
         //正式执行
@@ -184,7 +181,7 @@ public class UserController {
     @PostMapping("/updPwd")
     @ApiOperation(value = "修改指定id用户密码", notes = "修改自己的密码")
     public R<String> updatePwdById(Long userId,String oldPwd,String newPwd){
-        //管理员权限判定
+        //权限判定
         if(BaseContext.getIsAdmin() || !Objects.equals(BaseContext.getCurrentId(), userId))
             return R.failure("该id不是你的用户id，你无权操作");
         //正式执行
@@ -204,5 +201,43 @@ public class UserController {
         boolean success = userService.updateById(u);
         //返回结果
         return success ? R.success("修改用户密码成功") : R.failure("修改用户密码失败");
+    }
+
+    //封禁用户
+    @PostMapping("/lock")
+    @ApiOperation(value = "封禁指定id用户，day=-1时永封", notes = "管理员权限")
+    public R<String> lockById(Long userId,Integer days){
+        //权限判定
+        if(!BaseContext.getIsAdmin())
+            return R.failure("该操作需要管理员权限，你无权操作");
+        //正式执行
+        log.info("正在封禁用户: 用户id={}",userId);
+        //查看有没有该用户
+        User user = userService.getById(userId);
+        if(user == null)return R.failure("未找到相关用户");
+        //消息队列发送延迟队列以进行延时解封（day=-1时不用管）
+
+        //封禁与返回结果
+        user.setIsLock(1);
+        return userService.updateById(user) ? R.success("用户封禁成功") : R.failure("用户封禁失败");
+    }
+
+    //解封用户（手动）
+    @PostMapping("/unlock")
+    @ApiOperation(value = "解封指定id用户", notes = "管理员权限")
+    public R<String> unlockById(Long userId){
+        //权限判定
+        if(!BaseContext.getIsAdmin())
+            return R.failure("该操作需要管理员权限，你无权操作");
+        //正式执行
+        log.info("正在解封用户: 用户id={}",userId);
+        //查看有没有该用户
+        User user = userService.getById(userId);
+        if(user == null)return R.failure("未找到相关用户");
+        //删除消息队列里延迟队列消息
+
+        //封禁与返回结果
+        user.setIsLock(0);
+        return userService.updateById(user) ? R.success("用户解封成功") : R.failure("用户解封失败");
     }
 }
