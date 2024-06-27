@@ -68,7 +68,7 @@ public class BlogController {
     @ApiOperation(value = "博客的本用户分页查询", notes = "查看自己的博客，可以通过博客标题模糊查询")
     public R<Page> userpage(int page, int pageSize, String title){
         //权限判定
-        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() != null)
+        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要用户来进行，你无权操作");
         //正式执行
         log.info("正在进行分页查询 页数={} 页大小={} 查询博客名={}",page,pageSize,title);
@@ -110,7 +110,7 @@ public class BlogController {
     @ApiOperation(value = "创建博客", notes = "创建新的博客")
     public R<String> save(@RequestBody Blog blog){
         //权限判定
-        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() != null)
+        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要用户来进行，你无权操作");
         //正式执行
         log.info("正在执行博客的创建: {}",blog);
@@ -161,7 +161,7 @@ public class BlogController {
     @ApiOperation(value = "转发指定id的博客", notes = "后端用于记录")
     public R<String> del(@PathVariable("id") Long id){
         //权限判定
-        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() != null)
+        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要用户来进行，你无权操作");
         //正式执行
         log.info("正在执行博客的转发记录: {}",id);

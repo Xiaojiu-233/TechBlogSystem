@@ -13,5 +13,9 @@ public class Report {
 
     private String text;//文本
 
+    private Long targetId;//目标id
+
+    private String target;//目标类型
+
     private LocalDateTime createTime;//创建时间
 }

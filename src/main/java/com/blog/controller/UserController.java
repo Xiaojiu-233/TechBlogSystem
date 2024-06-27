@@ -208,7 +208,7 @@ public class UserController {
     @ApiOperation(value = "封禁指定id用户，day=-1时永封", notes = "管理员权限")
     public R<String> lockById(Long userId,Integer days){
         //权限判定
-        if(!BaseContext.getIsAdmin())
+        if(!BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要管理员权限，你无权操作");
         //正式执行
         log.info("正在封禁用户: 用户id={}",userId);
@@ -227,7 +227,7 @@ public class UserController {
     @ApiOperation(value = "解封指定id用户", notes = "管理员权限")
     public R<String> unlockById(Long userId){
         //权限判定
-        if(!BaseContext.getIsAdmin())
+        if(!BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要管理员权限，你无权操作");
         //正式执行
         log.info("正在解封用户: 用户id={}",userId);

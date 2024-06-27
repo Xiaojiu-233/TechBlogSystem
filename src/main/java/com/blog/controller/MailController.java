@@ -40,7 +40,7 @@ public class MailController {
     @ApiOperation(value = "邮件的本用户分页查询", notes = "查看自己的邮件，可以通过邮件标题模糊查询")
     public R<Page> userpage(int page, int pageSize, String title){
         //权限判定
-        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() != null)
+        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要用户来进行，你无权操作");
         //正式执行
         log.info("正在进行分页查询 页数={} 页大小={} 查询邮件名={}",page,pageSize,title);
@@ -84,7 +84,7 @@ public class MailController {
     @ApiOperation(value = "发邮件", notes = "发邮件")
     public R<String> save(@RequestBody Mail mail){
         //权限判定
-        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() != null)
+        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要用户来进行，你无权操作");
         //正式执行
         log.info("正在执行邮件的发送: {}",mail);
@@ -107,7 +107,7 @@ public class MailController {
     @ApiOperation(value = "删除自己的邮件", notes = "删除自己的邮件")
     public R<String> del(@PathVariable("ids") List<Long> ids){
         //权限判定
-        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() != null)
+        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要用户来进行，你无权操作");
         Long uid = BaseContext.getCurrentId();
         //正式执行
@@ -143,7 +143,7 @@ public class MailController {
     @ApiOperation(value = "读取邮件数", notes = "用户权限")
     public R<Integer> count(){
         //权限判定
-        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() != null)
+        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要用户来进行，你无权操作");
         Long uid = BaseContext.getCurrentId();
         //正式执行
@@ -154,7 +154,7 @@ public class MailController {
         queryWrapper.eq(Mail::getUserId,uid);
         count = mailService.count(queryWrapper);
         //返回结果
-        return count > -1 ? R.success(count) : R.failure("邮件删除失败");
+        return count > -1 ? R.success(count) : R.failure("邮件数量读取失败");
     }
 
 }

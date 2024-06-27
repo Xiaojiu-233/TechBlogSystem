@@ -43,7 +43,7 @@ public class CommentController {
     @ApiOperation(value = "评论的分页查询", notes = "可以通过博客、用户id查询，管理员权限")
     public R<Page> page(int page, int pageSize, Long userId, Long blogId ){
         //权限判定
-        if(!BaseContext.getIsAdmin() || BaseContext.getCurrentId() != null)
+        if(!BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要管理员权限，你无权操作");
         log.info("正在进行分页查询 页数={} 页大小={} 查询博客id={} 查询博主id={}",page,pageSize,blogId,userId);
 
@@ -68,7 +68,7 @@ public class CommentController {
     @ApiOperation(value = "评论的本用户分页查询", notes = "查看自己的评论，可以通过博客id查询")
     public R<Page> userpage(int page, int pageSize, Long blogId){
         //权限判定
-        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() != null)
+        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要用户来进行，你无权操作");
         //正式执行
         log.info("正在进行分页查询 页数={} 页大小={} 查询博客id={}",page,pageSize,blogId);
@@ -116,7 +116,7 @@ public class CommentController {
     @ApiOperation(value = "创建评论", notes = "创建新的评论")
     public R<String> save(@RequestBody Comment comment){
         //权限判定
-        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() != null)
+        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要用户来进行，你无权操作");
         //正式执行
         log.info("正在执行评论的创建: {}",comment);
@@ -153,7 +153,7 @@ public class CommentController {
     @ApiOperation(value = "转发指定id的评论", notes = "后端用于记录")
     public R<String> del(@PathVariable("id") Long id){
         //权限判定
-        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() != null)
+        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要用户来进行，你无权操作");
         //正式执行
         log.info("正在执行评论的转发记录: {}",id);
