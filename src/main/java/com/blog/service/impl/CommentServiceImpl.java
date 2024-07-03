@@ -7,9 +7,13 @@ import com.blog.mapper.BlogMapper;
 import com.blog.mapper.CommentMapper;
 import com.blog.service.BlogService;
 import com.blog.service.CommentService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
+@Slf4j
 public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> implements CommentService {
     
     //添加评论并设置点赞数据

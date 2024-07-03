@@ -35,6 +35,4 @@ public class BaseContext {
     //读取数据
     public static String getToken(){return token.get();};
 
-
-
 }

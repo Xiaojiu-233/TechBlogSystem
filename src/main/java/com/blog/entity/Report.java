@@ -1,5 +1,7 @@
 package com.blog.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -17,5 +19,6 @@ public class Report {
 
     private String target;//目标类型
 
+    @TableField(fill = FieldFill.INSERT)//插入时填充字段
     private LocalDateTime createTime;//创建时间
 }

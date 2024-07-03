@@ -9,14 +9,18 @@ import com.blog.mapper.LikesMapper;
 import com.blog.service.BlogService;
 import com.blog.service.LikesService;
 import com.blog.utils.BaseContext;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+@Service
+@Slf4j
 public class LikesServiceImpl extends ServiceImpl<LikesMapper, Likes> implements LikesService {
 
 //    @Resource(name = "redisTemplate_1")

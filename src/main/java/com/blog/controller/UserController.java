@@ -13,6 +13,7 @@ import com.blog.utils.RedisUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
@@ -33,6 +34,12 @@ public class UserController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private RedisTemplate redisTemplate;
+
+    @Resource
+    private RedisTemplate redisTemplate_3;
 
     //////////业务处理//////////
 
@@ -56,20 +63,35 @@ public class UserController {
         //用户存在性检测
         if(user == null )return R.failure("登录失败！原因为该用户不存在");
 
+        //通过redis读取登录失败次数
+        ValueOperations fop = redisTemplate_3.opsForValue();
+        Integer failCount = (Integer) fop.get(username);
+        //如果失败次数超过三次，则告诉用户
+        if(failCount != null && failCount > 3)return R.failure("登录失败！原因为失败登录次数超过三次，需等待60秒");
+
         //密码检测
         String password_get = user.getPassword();
-        if (!password_get.equals(password))return R.failure("登录失败！原因为密码错误");
+        if (!password_get.equals(password)){
+            //失败后，如果没有失败次数则添加失败次数，有则失败次数+1
+            fop.set(username,String.valueOf(failCount != null ? failCount+1 : 1),7, TimeUnit.DAYS);
+            //失败三次之后直接给rabbitmq丢延时消息
+            //返回结果
+            return R.failure("登录失败！原因为密码错误");
+        }
+
+        //登陆成功，失败次数清零
+        redisTemplate_3.delete(username);
 
         //清除redis凭证缓存
-//        RedisUtil.delRedisCache(request,redisTemplate,"userLogin");
-//        //登录成功，将登录凭证交给cookie与redis
-//        String code = UUID.randomUUID().toString();
-//        Cookie c = new Cookie("userLogin",code);
-//        c.setMaxAge(3600*24*7);
-//        c.setPath("/blog");
-//        response.addCookie(c);
-//        ValueOperations op = redisTemplate.opsForValue();
-//        op.set(code,String.valueOf(user.getUserId()),7, TimeUnit.DAYS);
+        RedisUtil.delRedisCache(request,redisTemplate,"userLogin");
+        //登录成功，将登录凭证交给cookie与redis
+        String code = UUID.randomUUID().toString();
+        Cookie c = new Cookie("userLogin",code);
+        c.setMaxAge(3600*24*7);
+        c.setPath("/blog");
+        response.addCookie(c);
+        ValueOperations op = redisTemplate.opsForValue();
+        op.set(code,String.valueOf(user.getId()),7, TimeUnit.DAYS);
 
         return R.success("登录成功！");
 
@@ -85,7 +107,7 @@ public class UserController {
         c.setPath("/blog");
         response.addCookie(c);
         //清除redis凭证缓存
-//        RedisUtil.delRedisCache(request,redisTemplate,"userLogin");
+        RedisUtil.delRedisCache(request,redisTemplate,"userLogin");
         return R.success("退出登录成功！");
     }
 

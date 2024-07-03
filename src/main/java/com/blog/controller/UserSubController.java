@@ -23,7 +23,7 @@ import java.util.List;
 //关注的管理控制器
 @Slf4j
 @RestController
-@RequestMapping("/blog/userColl")
+@RequestMapping("/blog/userSub")
 @Api(value = "关注的管理控制器",tags = "关注的管理控制器")
 public class UserSubController {
 

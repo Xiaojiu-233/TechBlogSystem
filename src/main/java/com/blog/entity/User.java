@@ -1,5 +1,7 @@
 package com.blog.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -27,6 +29,7 @@ public class User {
 
     private Integer isLock;//是否封禁 1封禁 0未封禁
 
+    @TableField(fill = FieldFill.INSERT)//插入时填充字段
     private LocalDateTime registerTime;//注册时间
 
     private LocalDateTime loginTime;//登录时间

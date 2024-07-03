@@ -7,6 +7,10 @@ import com.blog.mapper.BlogMapper;
 import com.blog.mapper.MailMapper;
 import com.blog.service.BlogService;
 import com.blog.service.MailService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
+@Service
+@Slf4j
 public class MailServiceImpl extends ServiceImpl<MailMapper, Mail> implements MailService {
 }
