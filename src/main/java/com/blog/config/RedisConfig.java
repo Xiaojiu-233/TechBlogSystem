@@ -60,7 +60,7 @@ public class RedisConfig extends CachingConfigurerSupport {
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         LettuceConnectionFactory lettuce = new LettuceConnectionFactory(
                 factory.getStandaloneConfiguration(),factory.getClientConfiguration());
-        lettuce.setDatabase(1);
+        lettuce.setDatabase(3);
         lettuce.afterPropertiesSet();
         redisTemplate.setConnectionFactory(lettuce);
         return redisTemplate;
