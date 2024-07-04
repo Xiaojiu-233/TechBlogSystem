@@ -159,7 +159,7 @@ public class BlogController {
     //转发指定id的博客
     @PostMapping("/share/{id}")
     @ApiOperation(value = "转发指定id的博客", notes = "后端用于记录")
-    public R<String> del(@PathVariable("id") Long id){
+    public synchronized R<String> share(@PathVariable("id") Long id){
         //权限判定
         if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要用户来进行，你无权操作");

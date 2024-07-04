@@ -6,6 +6,10 @@ import com.blog.entity.Blog;
 import com.blog.entity.User;
 import com.blog.entity.UserColl;
 import com.blog.entity.UserSub;
+import com.blog.entity.view.UserFans;
+import com.blog.entity.view.UserSubs;
+import com.blog.mapper.view.UserFansMapper;
+import com.blog.mapper.view.UserSubsMapper;
 import com.blog.service.BlogService;
 import com.blog.service.UserService;
 import com.blog.service.UserSubService;
@@ -33,12 +37,18 @@ public class UserSubController {
     @Resource
     private UserService userService;
 
+    @Resource
+    private UserSubsMapper userSubsMapper;
+
+    @Resource
+    private UserFansMapper userFansMapper;
+
     //////////业务处理//////////
 
     //关注&取消关注
     @PostMapping
     @ApiOperation(value = "关注&取消关注", notes = "用户权限")
-    public R<String> sub(@RequestBody UserSub userSub){
+    public synchronized R<String> sub(@RequestBody UserSub userSub){
         //权限判定
         if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要用户来进行，你无权操作");
@@ -105,10 +115,15 @@ public class UserSubController {
         log.info("正在执行关注/粉丝的数量读取: 博客id={}",userId);
         int count = -1;
         //读取关注数
-        LambdaQueryWrapper<UserSub> queryWrapper = new LambdaQueryWrapper<>();
-        if(searchFans != 0)queryWrapper.eq(UserSub::getSubId,userId);
-        else queryWrapper.eq(UserSub::getUserId,userId);
-        count = userSubService.count(queryWrapper);
+        if(searchFans == 1){
+            LambdaQueryWrapper<UserFans> fanQueryWrapper = new LambdaQueryWrapper<>();
+            fanQueryWrapper.eq(UserFans::getUserId,userId);
+            count = userFansMapper.selectCount(fanQueryWrapper);
+        }else{
+            LambdaQueryWrapper<UserSubs> subQueryWrapper = new LambdaQueryWrapper<>();
+            subQueryWrapper.eq(UserSubs::getUserId,userId);
+            count = userSubsMapper.selectCount(subQueryWrapper);
+        }
         //返回结果
         return count > -1 ? R.success(count) : R.failure("关注/粉丝数量读取失败");
     }

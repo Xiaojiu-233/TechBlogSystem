@@ -8,6 +8,8 @@ import com.blog.entity.Blog;
 import com.blog.entity.Mail;
 import com.blog.entity.User;
 import com.blog.entity.UserColl;
+import com.blog.entity.view.CollList;
+import com.blog.mapper.view.CollListMapper;
 import com.blog.service.BlogService;
 import com.blog.service.UserCollService;
 import com.blog.service.UserService;
@@ -38,12 +40,15 @@ public class UserCollController {
     @Resource
     private BlogService blogService;
 
+    @Resource
+    private CollListMapper collListMapper;
+
     //////////业务处理//////////
 
     //收藏&取消收藏
     @PostMapping
     @ApiOperation(value = "收藏&取消收藏", notes = "用户权限")
-    public R<String> coll(@RequestBody UserColl userColl){
+    public synchronized R<String> coll(@RequestBody UserColl userColl){
         //权限判定
         if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要用户来进行，你无权操作");
@@ -109,9 +114,9 @@ public class UserCollController {
         log.info("正在执行收藏的数量读取: 博客id={}",blogId);
         int count = -1;
         //读取收藏数
-        LambdaQueryWrapper<UserColl> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(UserColl::getBlogId,blogId);
-        count = userCollService.count(queryWrapper);
+        LambdaQueryWrapper<CollList> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(CollList::getBlogId,blogId);
+        count = collListMapper.selectCount(queryWrapper);
         //返回结果
         return count > -1 ? R.success(count) : R.failure("收藏数量读取失败");
     }

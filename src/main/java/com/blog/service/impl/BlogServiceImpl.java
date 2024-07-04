@@ -1,28 +1,86 @@
 package com.blog.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.blog.controller.LikesController;
 import com.blog.entity.Blog;
+import com.blog.entity.Likes;
+import com.blog.entity.view.LikesList;
 import com.blog.mapper.BlogMapper;
+import com.blog.mapper.view.LikesListMapper;
 import com.blog.service.BlogService;
+import com.blog.service.LikesService;
+import com.blog.utils.BaseContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @Slf4j
 public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements BlogService {
 
+    @Resource
+    private LikesListMapper mapper;
+
+    @Resource
+    private LikesService likesService;
+
     //添加博客并设置点赞数据
     @Override
+    @Transactional
     public boolean CreateBlogAndSetLike(Blog blog) {
-        return false;
+        //设置点赞id(需要在like_list检验是否重复)
+        Long likeId = null;
+        LambdaQueryWrapper<LikesList> queryWrapper = null;
+        do {
+            likeId = IdWorker.getId();
+            queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(LikesList::getLikesId, likeId);
+        } while (mapper.selectCount(queryWrapper) != 0);
+        blog.setUserId(BaseContext.getCurrentId());
+        blog.setLikesId(likeId);
+        //返回结果
+        return save(blog);
     }
 
     //删除博客并移除点赞数据(只要有一个删除成功就是成功)
     @Override
+    @Transactional
     public boolean DelBlogAndRemoveLike(List<Long> ids, Long userId, boolean isAdmin) {
         //执行内容（一个一个删除，删除前留下标题以备管理员发邮箱）
-        //如果删除为管理员操作，需要通过邮件将信息告诉被 成功 删除博客的所有作者
-        return false;
+        //构造条件构造器搜寻目标
+        LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Blog::getId,ids);
+        queryWrapper.eq(userId != null,Blog::getUserId,userId);
+        if(count(queryWrapper) == 0)return false;
+        //获取所有的博客然后一个一个删，先删除点赞，再删除博客
+        List<Blog> list = list(queryWrapper);
+        boolean success = false;
+        for(Blog b : list){
+            //删除点赞
+            Long likeId = b.getLikesId();
+            LambdaQueryWrapper<LikesList> queryWrapper1 = new LambdaQueryWrapper<>();
+            queryWrapper1.eq(LikesList::getLikesId, likeId);
+            LambdaQueryWrapper<Likes> queryWrapper2 = new LambdaQueryWrapper<>();
+            queryWrapper2.eq(Likes::getId, likeId);
+            if(mapper.selectCount(queryWrapper1) > 0 && likesService.remove(queryWrapper2)){
+                //删除博客
+                Long bid = b.getId();
+                boolean deleted = getById(bid) != null && removeById(bid);
+                if(deleted){
+                    success = true;
+                    //如果删除为管理员操作，需要通过邮件将信息告诉被 成功 删除博客的所有作者
+                    if(isAdmin){
+                        String title = b.getTitle();
+                    }
+                }
+            }
+        }
+        return success;
     }
 }

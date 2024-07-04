@@ -63,6 +63,9 @@ public class UserController {
         //用户存在性检测
         if(user == null )return R.failure("登录失败！原因为该用户不存在");
 
+        //用户是否已经封禁
+        if(user.getIsLock() == 1 )return R.failure("登录失败！原因为该用户已被封禁");
+
         //通过redis读取登录失败次数
         ValueOperations fop = redisTemplate_3.opsForValue();
         Integer failCount = (Integer) fop.get(username);

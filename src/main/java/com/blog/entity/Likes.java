@@ -1,11 +1,13 @@
 package com.blog.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 //点赞
 @Data
+@AllArgsConstructor
 public class Likes {
     private Long id;//id
 
