@@ -5,9 +5,15 @@ spring:
       url: jdbc:mysql://localhost:3306/xiaojiu_blog?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8
       username: root
       password: 123456
+  rabbitmq:
+    addresses: 192.168.254.128:5672 # 15672是web管理端口，访问端口是5672
+    password: 123456
+    username: xiaojiu
+    virtual-host: /blog
 server:
   port: 8080
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
+
 

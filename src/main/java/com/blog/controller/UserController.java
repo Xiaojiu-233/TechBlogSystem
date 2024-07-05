@@ -13,6 +13,7 @@ import com.blog.utils.RedisUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +42,9 @@ public class UserController {
     @Resource
     private RedisTemplate redisTemplate_3;
 
+    @Resource
+    private RabbitTemplate rabbitTemplate;
+
     //////////业务处理//////////
 
     //用户登录
@@ -68,7 +72,7 @@ public class UserController {
 
         //通过redis读取登录失败次数
         ValueOperations fop = redisTemplate_3.opsForValue();
-        Integer failCount = (Integer) fop.get(username);
+        Integer failCount = (Integer) fop.get("user::" + username);
         //如果失败次数超过三次，则告诉用户
         if(failCount != null && failCount > 3)return R.failure("登录失败！原因为失败登录次数超过三次，需等待60秒");
 
@@ -76,8 +80,9 @@ public class UserController {
         String password_get = user.getPassword();
         if (!password_get.equals(password)){
             //失败后，如果没有失败次数则添加失败次数，有则失败次数+1
-            fop.set(username,String.valueOf(failCount != null ? failCount+1 : 1),7, TimeUnit.DAYS);
+            fop.set("user::" + username,String.valueOf(failCount != null ? failCount+1 : 1),7, TimeUnit.DAYS);
             //失败三次之后直接给rabbitmq丢延时消息
+            rabbitTemplate.convertAndSend("ForbidAndLoginExchange", "LoginFailRouting","user::" + username);
             //返回结果
             return R.failure("登录失败！原因为密码错误");
         }

@@ -3,6 +3,7 @@ package com.blog.component;
 import com.blog.service.LikesService;
 import com.blog.utils.BaseContext;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.EnableScheduling;
