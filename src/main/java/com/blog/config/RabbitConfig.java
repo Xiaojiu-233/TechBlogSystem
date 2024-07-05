@@ -39,7 +39,7 @@ public class RabbitConfig {
         // x-dead-letter-exchange    这里声明当前队列绑定的死信交换机
         args.put("x-dead-letter-exchange", "ForbidAndLoginExchange");
         // x-dead-letter-routing-key  这里声明当前队列的死信路由key
-        args.put("x-dead-letter-routing-key", "UserForbidReadyBinding");
+        args.put("x-dead-letter-routing-key", "UserForbidReadyRouting");
         return QueueBuilder.durable("UserForbidQueue").withArguments(args).build();
     }
     @Bean
@@ -48,7 +48,7 @@ public class RabbitConfig {
         // x-dead-letter-exchange    这里声明当前队列绑定的死信交换机
         args.put("x-dead-letter-exchange", "ForbidAndLoginExchange");
         // x-dead-letter-routing-key  这里声明当前队列的死信路由key
-        args.put("x-dead-letter-routing-key", "LoginFailReadyBinding");
+        args.put("x-dead-letter-routing-key", "LoginFailReadyRouting");
         // x-message-ttl  声明队列的TTL
         args.put("x-message-ttl", 60000);
         return QueueBuilder.durable("LoginFailQueue").withArguments(args).build();
@@ -75,14 +75,14 @@ public class RabbitConfig {
     @Bean
     Binding LoginFailReadyBinding() {return BindingBuilder.bind(LoginFailReadyQueue()).to(ForbidAndLoginExchange()).with("LoginFailReadyRouting");}
 
-    //延时博客publis队列
+    //延时博客publish队列
     @Bean
     public Queue BlogPublishQueue() {
         Map<String, Object> args = new HashMap<>(2);
         // x-dead-letter-exchange    这里声明当前队列绑定的死信交换机
         args.put("x-dead-letter-exchange", "BlogPublishExchange");
         // x-dead-letter-routing-key  这里声明当前队列的死信路由key
-        args.put("x-dead-letter-routing-key", "BlogPublishReadyBinding");
+        args.put("x-dead-letter-routing-key", "BlogPublishReadyRouting");
         return QueueBuilder.durable("BlogPublishQueue").withArguments(args).build();
     }
     @Bean
