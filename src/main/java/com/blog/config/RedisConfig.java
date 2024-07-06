@@ -52,7 +52,7 @@ public class RedisConfig extends CachingConfigurerSupport {
         return redisTemplate;
     }
 
-    //调用数据库3的redisTemplate（登陆失败次数缓存）
+    //调用数据库3的redisTemplate（登陆失败次数&用户封禁时间戳缓存）
     @Bean("redisTemplate_3")
     public RedisTemplate<Object, Object> redisTemplate_3(LettuceConnectionFactory factory) {
         RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();

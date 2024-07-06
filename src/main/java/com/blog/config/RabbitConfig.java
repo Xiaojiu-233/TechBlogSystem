@@ -37,43 +37,35 @@ public class RabbitConfig {
     public Queue UserForbidQueue() {
         Map<String, Object> args = new HashMap<>(2);
         // x-dead-letter-exchange    这里声明当前队列绑定的死信交换机
-        args.put("x-dead-letter-exchange", "ForbidAndLoginExchange");
+        args.put("x-dead-letter-exchange", "ForbidExchange");
         // x-dead-letter-routing-key  这里声明当前队列的死信路由key
         args.put("x-dead-letter-routing-key", "UserForbidReadyRouting");
         return QueueBuilder.durable("UserForbidQueue").withArguments(args).build();
     }
     @Bean
-    public Queue LoginFailQueue() {
-        Map<String, Object> args = new HashMap<>(2);
-        // x-dead-letter-exchange    这里声明当前队列绑定的死信交换机
-        args.put("x-dead-letter-exchange", "ForbidAndLoginExchange");
-        // x-dead-letter-routing-key  这里声明当前队列的死信路由key
-        args.put("x-dead-letter-routing-key", "LoginFailReadyRouting");
-        // x-message-ttl  声明队列的TTL
-        args.put("x-message-ttl", 60000);
-        return QueueBuilder.durable("LoginFailQueue").withArguments(args).build();
+    DirectExchange ForbidExchange() {
+        return new DirectExchange("ForbidExchange");
     }
     @Bean
-    DirectExchange ForbidAndLoginExchange() {
-        return new DirectExchange("ForbidAndLoginExchange");
-    }
-    @Bean
-    Binding UserForbidBinding() {return BindingBuilder.bind(UserForbidQueue()).to(ForbidAndLoginExchange()).with("UserForbidRouting");}
-    @Bean
-    Binding LoginFailBinding() {return BindingBuilder.bind(LoginFailQueue()).to(ForbidAndLoginExchange()).with("LoginFailRouting");}
+    Binding UserForbidBinding() {return BindingBuilder.bind(UserForbidQueue()).to(ForbidExchange()).with("UserForbidRouting");}
     //死信队列和其routing
     @Bean
     public Queue UserForbidReadyQueue() {
         return new Queue("UserForbidReadyQueue",true);
     }
     @Bean
-    public Queue LoginFailReadyQueue() {
-        return new Queue("LoginFailReadyQueue",true);
+    Binding UserForbidReadyBinding() {return BindingBuilder.bind(UserForbidReadyQueue()).to(ForbidExchange()).with("UserForbidReadyRouting");}
+
+    //取消封禁队列与交换机
+    @Bean
+    public Queue CancelForbidQueue() {
+        return new Queue("CancelForbidQueue",true);
     }
     @Bean
-    Binding UserForbidReadyBinding() {return BindingBuilder.bind(UserForbidReadyQueue()).to(ForbidAndLoginExchange()).with("UserForbidReadyRouting");}
+    DirectExchange CancelExchange() {return new DirectExchange("CancelExchange");}
     @Bean
-    Binding LoginFailReadyBinding() {return BindingBuilder.bind(LoginFailReadyQueue()).to(ForbidAndLoginExchange()).with("LoginFailReadyRouting");}
+    Binding CancelForbidBinding() {return BindingBuilder.bind(CancelForbidQueue()).to(CancelExchange()).with("CancelForbidRouting");}
+
 
     //延时博客publish队列
     @Bean

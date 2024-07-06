@@ -27,7 +27,7 @@ public class User {
 
     private String sign;//个性签名
 
-    private Integer isLock;//是否封禁 1封禁 0未封禁
+    private Long isLock;//是否封禁 0未封禁 此外的数字代表封禁时时间戳
 
     @TableField(fill = FieldFill.INSERT)//插入时填充字段
     private LocalDateTime registerTime;//注册时间

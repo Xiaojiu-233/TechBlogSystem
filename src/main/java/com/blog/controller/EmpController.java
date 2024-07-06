@@ -82,10 +82,8 @@ public class EmpController {
         String password_get = emp.getPassword();
         if (!password_get.equals(password)){
             //失败后，如果没有失败次数则添加失败次数，有则失败次数+1
-            fop.set("emp::" + username,String.valueOf(failCount != null ? failCount+1 : 1),7, TimeUnit.DAYS);
-            //失败三次之后直接给rabbitmq丢延时消息
-            if(failCount != null && failCount >= 3)
-            rabbitTemplate.convertAndSend("ForbidAndLoginExchange", "LoginFailRouting","emp::" + username);
+            if(failCount != null && failCount >= 2)
+                fop.set("emp::" + username,String.valueOf(failCount != null ? failCount+1 : 1),60, TimeUnit.SECONDS);
             //返回结果
             return R.failure("登录失败！原因为密码错误");
         }

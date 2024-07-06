@@ -13,6 +13,9 @@ import com.blog.utils.RedisUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -21,6 +24,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.sql.Time;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -68,22 +72,20 @@ public class UserController {
         if(user == null )return R.failure("登录失败！原因为该用户不存在");
 
         //用户是否已经封禁
-        if(user.getIsLock() == 1 )return R.failure("登录失败！原因为该用户已被封禁");
+        if(user.getIsLock() != 0 )return R.failure("登录失败！原因为该用户已被封禁");
 
         //通过redis读取登录失败次数
         ValueOperations fop = redisTemplate_3.opsForValue();
         Integer failCount = fop.get("user::" + username) == null ? null : Integer.parseInt((String) fop.get("user::" + username)) ;
         //如果失败次数超过三次，则告诉用户
-        if(failCount != null && failCount > 3)return R.failure("登录失败！原因为失败登录次数超过三次，需等待60秒");
+        if(failCount != null && failCount >= 3)return R.failure("登录失败！原因为失败登录次数超过三次，需等待60秒");
 
         //密码检测
         String password_get = user.getPassword();
         if (!password_get.equals(password)){
             //失败后，如果没有失败次数则添加失败次数，有则失败次数+1
-            fop.set("user::" + username,String.valueOf(failCount != null ? failCount+1 : 1),7, TimeUnit.DAYS);
-            //失败三次之后直接给rabbitmq丢延时消息
-            if(failCount != null && failCount >= 3)
-            rabbitTemplate.convertAndSend("ForbidAndLoginExchange", "LoginFailRouting","user::" + username);
+            if(failCount != null && failCount >= 2)
+                fop.set("user::" + username,String.valueOf(failCount != null ? failCount+1 : 1),60, TimeUnit.SECONDS);
             //返回结果
             return R.failure("登录失败！原因为密码错误");
         }
@@ -242,14 +244,26 @@ public class UserController {
         if(!BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要管理员权限，你无权操作");
         //正式执行
-        log.info("正在封禁用户: 用户id={}",userId);
+        log.info("正在封禁用户: 用户id={} 时间={}",userId,days);
         //查看有没有该用户
         User user = userService.getById(userId);
         if(user == null)return R.failure("未找到相关用户");
         //消息队列发送延迟队列以进行延时解封（day=-1时不用管）
-
+        Long lockTime = System.currentTimeMillis();
+        if(days != -1){
+            //如果之前存在封禁情况的话，删除之前的队列消息
+            Long lockedTime = user.getIsLock();
+            Long lockUntil = lockTime + 1000L * 3600 * 24 * days;
+            if(lockedTime != 0)rabbitTemplate.convertAndSend("CancelExchange","CancelForbidRouting",lockedTime);
+            //添加现有的新消息
+            rabbitTemplate.convertAndSend("ForbidExchange", "UserForbidRouting", userId + "::" + lockUntil, message -> {
+                message.getMessageProperties().setExpiration(String.valueOf(lockTime));
+                message.getMessageProperties().setMessageId(lockTime.toString());
+                return message;
+            });
+        }
         //封禁与返回结果
-        user.setIsLock(1);
+        user.setIsLock(lockTime);
         return userService.updateById(user) ? R.success("用户封禁成功") : R.failure("用户封禁失败");
     }
 
@@ -266,9 +280,10 @@ public class UserController {
         User user = userService.getById(userId);
         if(user == null)return R.failure("未找到相关用户");
         //删除消息队列里延迟队列消息
-
-        //封禁与返回结果
-        user.setIsLock(0);
+        Long lockedTime = user.getIsLock();
+        if(lockedTime != 0)rabbitTemplate.convertAndSend("CancelExchange","CancelForbidRouting",lockedTime);
+        //解封与返回结果
+        user.setIsLock(0L);
         return userService.updateById(user) ? R.success("用户解封成功") : R.failure("用户解封失败");
     }
 }
