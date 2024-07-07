@@ -15,6 +15,7 @@ import com.blog.utils.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -32,6 +33,9 @@ public class MailController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
     //////////数据处理//////////
 
@@ -79,7 +83,7 @@ public class MailController {
         return R.success(mail);
     }
 
-    //发邮件
+    //用户发邮件
     @PostMapping
     @ApiOperation(value = "发邮件", notes = "发邮件")
     public R<String> save(@RequestBody Mail mail){
@@ -97,9 +101,10 @@ public class MailController {
         mail.setId(IdWorker.getId());
         mail.setFromId(BaseContext.getCurrentId());
         mail.setFromName(user.getName());
-        boolean success = mailService.save(mail);
+        //邮件发送给消息队列
+        rabbitTemplate.convertAndSend("MailCacheExchange","MailCacheRouting",mail.objToMsg());
         //返回结果
-        return success ? R.success("邮件发送成功") : R.failure("邮件发送失败");
+        return R.success("邮件发送成功") ;
     }
 
     //删除指定id的邮件

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.blog.entity.Blog;
 import com.blog.entity.Comment;
 import com.blog.entity.Likes;
+import com.blog.entity.Mail;
 import com.blog.entity.view.LikesList;
 import com.blog.mapper.BlogMapper;
 import com.blog.mapper.CommentMapper;
@@ -15,6 +16,7 @@ import com.blog.service.CommentService;
 import com.blog.service.LikesService;
 import com.blog.utils.BaseContext;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,9 +29,10 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
 
     @Resource
     private LikesListMapper mapper;
-
     @Resource
     private LikesService likesService;
+    @Resource
+    private RabbitTemplate rabbitTemplate;
     
     //添加评论并设置点赞数据
     @Override
@@ -78,6 +81,13 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                     //如果删除为管理员操作，需要通过邮件将信息告诉被 成功 删除评论的所有作者
                     if(isAdmin){
                         String text = c.getText();
+                        text = text.length() > 10 ? text.substring(0,10) + "..." : text;
+                        //如果删除为管理员操作，需要通过邮件将信息告诉被 成功 评论博客的所有作者
+                        if(isAdmin){
+                            String msg = "您好，很抱歉地通知您：您的评论【" + text + "】由于不遵守社区规范，已被删除。";
+                            rabbitTemplate.convertAndSend("MailCacheExchange","MailCacheRouting",
+                                    new Mail(null,c.getUserId(),null,"管理员","评论删除通知",msg,0,null).objToMsg());
+                        }
                     }
                 }
             }

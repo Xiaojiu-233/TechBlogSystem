@@ -6,13 +6,17 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.blog.controller.LikesController;
 import com.blog.entity.Blog;
 import com.blog.entity.Likes;
+import com.blog.entity.Mail;
+import com.blog.entity.UserColl;
 import com.blog.entity.view.LikesList;
 import com.blog.mapper.BlogMapper;
 import com.blog.mapper.view.LikesListMapper;
 import com.blog.service.BlogService;
 import com.blog.service.LikesService;
+import com.blog.service.UserCollService;
 import com.blog.utils.BaseContext;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +30,12 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
 
     @Resource
     private LikesListMapper mapper;
-
     @Resource
     private LikesService likesService;
+    @Resource
+    private UserCollService userCollService;
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
     //添加博客并设置点赞数据
     @Override
@@ -62,6 +69,10 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
         List<Blog> list = list(queryWrapper);
         boolean success = false;
         for(Blog b : list){
+            //删除收藏信息
+            LambdaQueryWrapper<UserColl> collQueryWrapper = new LambdaQueryWrapper<>();
+            collQueryWrapper.eq(UserColl::getBlogId, b.getId());
+            if(!userCollService.remove(collQueryWrapper))continue;
             //删除点赞
             Long likeId = b.getLikesId();
             LambdaQueryWrapper<LikesList> queryWrapper1 = new LambdaQueryWrapper<>();
@@ -76,7 +87,9 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
                     success = true;
                     //如果删除为管理员操作，需要通过邮件将信息告诉被 成功 删除博客的所有作者
                     if(isAdmin){
-                        String title = b.getTitle();
+                        String msg = "您好，很抱歉地通知您：您的博客【" +b.getTitle() + "】由于不遵守社区规范，已被删除。";
+                        rabbitTemplate.convertAndSend("MailCacheExchange","MailCacheRouting",
+                                new Mail(null,b.getUserId(),null,"管理员","博客删除通知",msg,0,null).objToMsg());
                     }
                 }
             }

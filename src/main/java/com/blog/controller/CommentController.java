@@ -15,6 +15,7 @@ import com.blog.utils.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -35,6 +36,9 @@ public class CommentController {
 
     @Resource
     private BlogService blogService;
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
     //////////数据处理//////////
 
@@ -130,9 +134,10 @@ public class CommentController {
         comment.setUserId(BaseContext.getCurrentId());
         comment.setUserName(user.getName());
         comment.setBlogId(comment.getBlogId());
-        boolean success = commentService.CreateCommAndSetLike(comment);
+        //发送给消息队列
+        rabbitTemplate.convertAndSend("CommentCacheExchange","CommentCacheRouting",comment.objToMsg());
         //返回结果
-        return success ? R.success("评论创建成功") : R.failure("评论创建失败");
+        return R.success("评论发送成功") ;
     }
 
     //删除指定id的评论

@@ -15,6 +15,7 @@ import com.blog.utils.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -35,6 +36,9 @@ public class BlogController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
     //////////数据处理//////////
 
@@ -107,8 +111,8 @@ public class BlogController {
 
     //创建博客
     @PostMapping
-    @ApiOperation(value = "创建博客", notes = "创建新的博客")
-    public R<String> save(@RequestBody Blog blog){
+    @ApiOperation(value = "创建博客", notes = "创建新的博客，参数targetDate存放延时发布的时间戳")
+    public R<String> save(@RequestBody Blog blog,@PathVariable Long targetDate){
         //权限判定
         if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要用户来进行，你无权操作");
@@ -121,9 +125,16 @@ public class BlogController {
         blog.setId(IdWorker.getId());
         blog.setUserId(BaseContext.getCurrentId());
         blog.setUserName(user.getName());
-        boolean success = blogService.CreateBlogAndSetLike(blog);
+        //发送给消息队列
+        Long delayTime;
+        if(targetDate != null) delayTime = targetDate - System.currentTimeMillis();
+        else delayTime = 1L;
+        rabbitTemplate.convertAndSend("BlogPublishExchange", "BlogPublishRouting", blog.objToMsg(), message -> {
+            message.getMessageProperties().setExpiration(String.valueOf(delayTime));
+            return message;
+        });
         //返回结果
-        return success ? R.success("博客创建成功") : R.failure("博客创建失败");
+        return R.success("博客创建成功") ;
     }
 
     //修改博客
