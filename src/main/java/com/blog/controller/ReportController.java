@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.entity.Blog;
+import com.blog.entity.Mail;
 import com.blog.entity.Report;
 import com.blog.entity.User;
 import com.blog.service.BlogService;
@@ -15,6 +16,7 @@ import com.blog.utils.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -29,9 +31,10 @@ public class ReportController {
 
     @Resource
     private ReportService reportService;
-
     @Resource
     private UserService userService;
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
     //////////数据处理//////////
 
@@ -75,7 +78,9 @@ public class ReportController {
         boolean success = reportService.removeById(id);
         //将结果反馈给用户（通过邮箱通知，使用reason）
         if(success){
-
+            String msg = "您好，您对" + report.getTarget() +"（id为" + report.getTargetId() + "）的举报已成功受理，感谢您为美化社区环境做出的贡献！。";
+            rabbitTemplate.convertAndSend("MailCacheExchange","MailCacheRouting",
+                    new Mail(null,report.getUserId(),null,"管理员","举报受理通知",msg,0,null).objToMsg());
         }
         //返回结果
         return success ? R.success("举报处理成功") : R.failure("举报处理失败");
