@@ -1,6 +1,10 @@
 package com.blog.filter;
 
 import com.alibaba.fastjson.JSON;
+import com.blog.entity.Emp;
+import com.blog.entity.User;
+import com.blog.service.EmpService;
+import com.blog.service.UserService;
 import com.blog.utils.BaseContext;
 import com.blog.utils.R;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +20,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 //检测用户是否已经登录完成
 @Slf4j
@@ -28,6 +34,10 @@ public class LoginCheckFilter implements Filter {
 
     @Resource(name = "redisTemplate")
     private RedisTemplate redisTemplate;
+    @Resource
+    private UserService userService;
+    @Resource
+    private EmpService empService;
 
     //执行过滤器程序
     @Override
@@ -95,6 +105,23 @@ public class LoginCheckFilter implements Filter {
 
         //根据结果判定登录是否成功
         if(success){
+            //如果是今天第一次登录，则记录登录时间
+            LocalDateTime now = LocalDateTime.now();
+            if(BaseContext.getIsAdmin()){
+                Emp emp = empService.getById(targetId);
+                LocalDateTime time = emp.getLoginTime();
+                if(time == null || ChronoUnit.DAYS.between(time,now) >= 1){
+                    emp.setLoginTime(now);
+                    empService.updateById(emp);
+                }
+            }else{
+                User user = userService.getById(targetId);
+                LocalDateTime time = user.getLoginTime();
+                if(time == null || ChronoUnit.DAYS.between(time,now) >= 1){
+                    user.setLoginTime(now);
+                    userService.updateById(user);
+                }
+            }
             //登录成功
             log.info("本次请求为用户ID：{} 发起，允许通行",targetId);
             BaseContext.setCurrentId(targetId);

@@ -24,6 +24,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -93,6 +95,13 @@ public class EmpController {
 
         //清除redis凭证缓存
         RedisUtil.delRedisCache(request,redisTemplate,"empLogin");
+        //如果是今天第一次登录，则记录登录时间
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime time = emp.getLoginTime();
+        if(time == null || ChronoUnit.DAYS.between(time,now) >= 1){
+            emp.setLoginTime(now);
+            empService.updateById(emp);
+        }
         //登录成功，将登录凭证交给cookie与redis
         String code = UUID.randomUUID().toString();
         Cookie c = new Cookie("empLogin",code);

@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.Time;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -95,6 +96,13 @@ public class UserController {
 
         //清除redis凭证缓存
         RedisUtil.delRedisCache(request,redisTemplate,"userLogin");
+        //如果是今天第一次登录，则记录登录时间
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime time = user.getLoginTime();
+        if(time == null || ChronoUnit.DAYS.between(time,now) >= 1){
+            user.setLoginTime(now);
+            userService.updateById(user);
+        }
         //登录成功，将登录凭证交给cookie与redis
         String code = UUID.randomUUID().toString();
         Cookie c = new Cookie("userLogin",code);

@@ -83,12 +83,18 @@ public class LikesServiceImpl extends ServiceImpl<LikesMapper, Likes> implements
         //如果没找到数据直接结束
         if(keys.isEmpty())return;
         //正式执行
+        LambdaQueryWrapper<LikesList> likeQueryWrapper;
         HashOperations operations = redisTemplate_1.opsForHash();
         for (String key:keys){
             Map<String,Integer> entries = operations.entries(key);
             for(String uid:entries.keySet()){
                 //将读取到的数据处理后存入mysql数据库
                 Long likes_id = Long.parseLong(key);
+                //查询likesList有没有这个likes_id的数据，没有就算了
+                likeQueryWrapper = new LambdaQueryWrapper<>();
+                likeQueryWrapper.eq(LikesList::getLikesId,likes_id);
+                if(likesListMapper.selectCount(likeQueryWrapper) <= 0)continue;
+                //如果存在这个likes_id，就继续执行
                 Long user_id = Long.parseLong(uid);
                 int value = entries.get(uid);
                 Likes like = new Likes(likes_id,user_id,value);
