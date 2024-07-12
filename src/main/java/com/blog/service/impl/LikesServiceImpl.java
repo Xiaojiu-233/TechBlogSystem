@@ -5,21 +5,25 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.blog.entity.Blog;
 import com.blog.entity.Likes;
 import com.blog.entity.view.LikesList;
+import com.blog.entity.view.LikesTarget;
 import com.blog.mapper.BlogMapper;
 import com.blog.mapper.LikesMapper;
 import com.blog.mapper.view.LikesListMapper;
+import com.blog.mapper.view.LikesTargetMapper;
 import com.blog.service.BlogService;
 import com.blog.service.LikesService;
 import com.blog.utils.BaseContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -29,12 +33,15 @@ public class LikesServiceImpl extends ServiceImpl<LikesMapper, Likes> implements
 
     @Resource(name = "redisTemplate_1")
     private RedisTemplate redisTemplate_1;
-
     @Resource(name = "redisTemplate_2")
     private RedisTemplate redisTemplate_2;
+    @Resource(name = "redisTemplate_4")
+    private RedisTemplate redisTemplate_4;
 
     @Resource
     private LikesListMapper likesListMapper;
+    @Resource
+    private LikesTargetMapper likesTargetMapper;
 
     //读取点赞状态
     @Override
@@ -47,7 +54,6 @@ public class LikesServiceImpl extends ServiceImpl<LikesMapper, Likes> implements
         log.info("正在执行获取点赞信息操作，点赞体id={},点赞者id={}",likesId,userId);
         //用户点赞状态查询，查询redis缓存
         HashOperations op = redisTemplate_1.opsForHash();
-        ValueOperations op2 = redisTemplate_2.opsForValue();
         rets[0] = (Integer) op.get(likesId.toString(),userId.toString());
         if(rets[0] == null){
             //没有缓存时读取mysql数据库
@@ -58,6 +64,7 @@ public class LikesServiceImpl extends ServiceImpl<LikesMapper, Likes> implements
             rets[0] = like == null ? 0 : like.getStates();
         }
         //点赞体的总点赞数
+        ValueOperations op2 = redisTemplate_2.opsForValue();
         Integer count = (Integer) op2.get("likes" + likesId);
         if(count != null){
             rets[1] = count;return rets;
@@ -98,6 +105,15 @@ public class LikesServiceImpl extends ServiceImpl<LikesMapper, Likes> implements
                 Long user_id = Long.parseLong(uid);
                 int value = entries.get(uid);
                 Likes like = new Likes(likes_id,user_id,value);
+                //存储到redis4号数据库作为点赞通知缓存(自己给自己的点赞通知就不需要搞了)
+                LambdaQueryWrapper<LikesTarget> noticeQueryWrapper = new LambdaQueryWrapper<>();
+                noticeQueryWrapper.eq(LikesTarget::getLikesId,likes_id);
+                LikesTarget target = likesTargetMapper.selectOne(noticeQueryWrapper);
+                if(target != null && value == 1 && !Objects.equals(target.getId(), user_id)){
+                    SetOperations setOperations = redisTemplate_4.opsForSet();
+                    setOperations.add(target.getId().toString(),(target.getBlogId() == null ?
+                            "评论:" + target.getCommentId() :"博客:" + target.getBlogId() ) + "#" + likes_id);
+                }
                 //添加或更新
                 LambdaQueryWrapper<Likes> queryWrapper = new LambdaQueryWrapper<>();
                 queryWrapper.eq(Likes::getId,likes_id);

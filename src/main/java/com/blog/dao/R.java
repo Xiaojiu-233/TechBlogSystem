@@ -1,11 +1,10 @@
-package com.blog.utils;
+package com.blog.dao;
 
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
+//数据传输实体
 @Data
 public class R<T> implements Serializable {
 

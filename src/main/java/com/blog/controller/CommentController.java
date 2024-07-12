@@ -2,7 +2,6 @@ package com.blog.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.entity.Blog;
 import com.blog.entity.Comment;
@@ -11,7 +10,7 @@ import com.blog.service.BlogService;
 import com.blog.service.CommentService;
 import com.blog.service.UserService;
 import com.blog.utils.BaseContext;
-import com.blog.utils.R;
+import com.blog.dao.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;

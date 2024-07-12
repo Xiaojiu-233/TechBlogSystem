@@ -2,15 +2,11 @@ package com.blog.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.entity.Emp;
-import com.blog.entity.User;
 import com.blog.service.EmpService;
-import com.blog.service.UserService;
 import com.blog.utils.BaseContext;
 import com.blog.utils.EncryptUtil;
-import com.blog.utils.R;
+import com.blog.dao.R;
 import com.blog.utils.RedisUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,12 +22,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 //管理员的管理控制器
 @Slf4j

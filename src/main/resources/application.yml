@@ -12,8 +12,12 @@ spring:
     virtual-host: /blog
 server:
   port: 8080
+  tomcat:
+    threads:
+      max: 300
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
+
 
 

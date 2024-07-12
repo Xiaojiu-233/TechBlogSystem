@@ -4,21 +4,25 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.blog.entity.Blog;
 import com.blog.entity.Mail;
+import com.blog.entity.NoticeCheck;
 import com.blog.entity.User;
-import com.blog.service.BlogService;
+import com.blog.entity.view.UncheckNotice;
+import com.blog.mapper.view.UncheckNoticeMapper;
 import com.blog.service.MailService;
+import com.blog.service.NoticeCheckService;
 import com.blog.service.UserService;
 import com.blog.utils.BaseContext;
-import com.blog.utils.R;
+import com.blog.dao.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.List;
 
 //邮件的管理控制器
@@ -30,9 +34,12 @@ public class MailController {
 
     @Resource
     private MailService mailService;
-
     @Resource
     private UserService userService;
+    @Resource
+    private NoticeCheckService noticeCheckService;
+    @Resource
+    private UncheckNoticeMapper uncheckNoticeMapper;
 
     @Resource
     private RabbitTemplate rabbitTemplate;
@@ -66,8 +73,40 @@ public class MailController {
         return R.success(pageInfo);
     }
 
+    //读取自己的通知邮件
+    @GetMapping("/noticepage")
+    @ApiOperation(value = "邮件的本用户分页查询(通知邮件)", notes = "查看自己的邮件，可以通过邮件标题模糊查询")
+    public R<Page> noticepage(int page, int pageSize, String title){
+        //权限判定
+        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
+            return R.failure("该操作需要用户来进行，你无权操作");
+        //正式执行
+        log.info("正在进行分页查询 页数={} 页大小={} 查询邮件名={}",page,pageSize,title);
+        //构造分页构造器
+        Page<Mail> pageInfo = new Page(page,pageSize);
+
+        //构造条件构造器
+        LambdaQueryWrapper<Mail> queryWrapper = new LambdaQueryWrapper<>();
+        //查看用户数据
+        User user = userService.getById(BaseContext.getCurrentId());
+        if(user == null) R.failure("查询失败，因为用户不存在");
+        //添加过滤条件（不需要展示text）
+        queryWrapper.like(StringUtils.isNotBlank(title),Mail::getTitle,title);
+        queryWrapper.isNull(Mail::getUserId);
+        queryWrapper.ge(Mail::getCreateTime,user.getRegisterTime());
+        queryWrapper.select(Mail::getId,Mail::getCreateTime,Mail::getTitle,Mail::getFromName,Mail::getFromId,Mail::getIsRead,Mail::getUserId);
+        //添加排序条件
+        queryWrapper.orderByDesc(Mail::getCreateTime);
+        //分页查询，结果返回给pageInfo
+        mailService.page(pageInfo,queryWrapper);
+
+        //返回结果
+        return R.success(pageInfo);
+    }
+
     //邮件的id查询
     @GetMapping("/{id}")
+    @Transactional
     @ApiOperation(value = "邮件的id查询", notes = "邮件的id查询，本用户操作，读完会把邮件设置为已读")
     public R<Mail> getById(@PathVariable("id")Long id){
         //正式执行
@@ -76,9 +115,15 @@ public class MailController {
         Mail mail= mailService.getById(id);
         //排除异常情况
         if(mail==null)return R.failure("邮件查询失败");
-        //邮件会设置为已读
-        mail.setIsRead(1);
-        mailService.updateById(mail);
+        //用户权限，邮件会设置为已读，如果是通知邮件(userId = null)则添加已读信息到NoticeCheck表中
+        if(!BaseContext.getIsAdmin() && BaseContext.getCurrentId() == null){
+            if(mail.getUserId() == null){
+                noticeCheckService.save(new NoticeCheck(BaseContext.getCurrentId(),mail.getId()));
+            }else{
+                mail.setIsRead(1);
+                mailService.updateById(mail);
+            }
+        }
         //返回结果
         return R.success(mail);
     }
@@ -127,9 +172,9 @@ public class MailController {
         return success ? R.success("邮件删除成功") : R.failure("邮件删除失败");
     }
 
-    //管理员群发邮件
+    //管理员群发邮件(通知)
     @PostMapping("/group")
-    @ApiOperation(value = "管理员群发邮件", notes = "管理员权限")
+    @ApiOperation(value = "管理员群发邮件(通知)", notes = "管理员权限")
     public R<String> group(@RequestBody Mail mail){
         //权限判定
         if(!BaseContext.getIsAdmin())
@@ -140,7 +185,7 @@ public class MailController {
 
         boolean success = false;
         //返回结果
-        return success ? R.success("邮件群发送成功") : R.failure("邮件群发送失败");
+        return success ? R.success("通知邮件发送成功") : R.failure("通知邮件发送失败");
     }
 
     //读取邮件数
@@ -162,4 +207,22 @@ public class MailController {
         return count > -1 ? R.success(count) : R.failure("邮件数量读取失败");
     }
 
+    //读取自己的通知邮件数量
+    @GetMapping("/noticecount")
+    @ApiOperation(value = "读取自己的通知邮件数", notes = "用户权限")
+    public R<Integer> noticecount(){
+        //权限判定
+        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
+            return R.failure("该操作需要用户来进行，你无权操作");
+        Long uid = BaseContext.getCurrentId();
+        //正式执行
+        log.info("正在执行邮件的数量读取: 用户id={}",uid);
+        //读取邮件数
+        LambdaQueryWrapper<UncheckNotice> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UncheckNotice::getUserId,uid);
+        UncheckNotice un = uncheckNoticeMapper.selectOne(queryWrapper);
+        int count = un.getNum();
+        //返回结果
+        return count > -1 ? R.success(count) : R.failure("邮件数量读取失败");
+    }
 }

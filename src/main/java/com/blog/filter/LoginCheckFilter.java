@@ -6,7 +6,7 @@ import com.blog.entity.User;
 import com.blog.service.EmpService;
 import com.blog.service.UserService;
 import com.blog.utils.BaseContext;
-import com.blog.utils.R;
+import com.blog.dao.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
