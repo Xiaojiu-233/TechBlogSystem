@@ -36,6 +36,8 @@ public class RabbitMsgConsumer {
 
     @Autowired
     private ConnectionFactory connectionFactory;
+    @Resource
+    private RabbitmqLogManager rabbitmqLogManager;
 
     //监听队列
     //监听队列DataCacheQueue
@@ -65,12 +67,18 @@ public class RabbitMsgConsumer {
         //确定用户真实性
         if(user == null)return;
         //如果当前时间是在解封时间之后，则进行解封，否则不解封
-        long unlockTime = Long.parseLong(sp[1]);
-        long nowTime = System.currentTimeMillis();
-        if(nowTime > unlockTime){
-            user.setIsLock(0L);
-            userService.updateById(user);
+        synchronized (RabbitmqLogManager.class){
+            long unlockTime = Long.parseLong(sp[1]);
+            long nowTime = System.currentTimeMillis();
+            if(nowTime >= unlockTime){
+                log.info("用户：{} 解封成功" , user.getId());
+                user.setIsLock(0L);
+                userService.updateById(user);
+            }
+            //日志记录
+            rabbitmqLogManager.writeLog(false,sp[0] + " " + sp[1]);
         }
+
     }
 
     //监听队列BlogPublishQueue

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.blog.component.RabbitmqLogManager;
 import com.blog.entity.User;
 import com.blog.service.UserService;
 import com.blog.utils.BaseContext;
@@ -36,10 +37,10 @@ public class UserController {
 
     @Resource
     private UserService userService;
-
+    @Resource
+    private RabbitmqLogManager rabbitmqLogManager;
     @Resource
     private RedisTemplate redisTemplate;
-
     @Resource
     private RedisTemplate redisTemplate_3;
 
@@ -253,21 +254,25 @@ public class UserController {
         User user = userService.getById(userId);
         if(user == null)return R.failure("未找到相关用户");
         //消息队列发送延迟队列以进行延时解封（day=-1时不用管）
-        Long lockTime = System.currentTimeMillis();
-        if(days != -1){
-            //如果之前存在封禁情况的话，删除之前的队列消息
-            Long lockedTime = user.getIsLock();
-            Long lockUntil = lockTime + 1000L * 3600 * 24 * days;
-            if(lockedTime != 0)rabbitTemplate.convertAndSend("CancelExchange","CancelForbidRouting",lockedTime);
-            //添加现有的新消息
-            rabbitTemplate.convertAndSend("ForbidExchange", "UserForbidRouting", userId + "::" + lockUntil, message -> {
-                message.getMessageProperties().setExpiration(String.valueOf(lockTime));
-                message.getMessageProperties().setMessageId(lockTime.toString());
-                return message;
-            });
+        Long expTime = 1000L * 3600 * 24 * days;
+        Long lockUntil = System.currentTimeMillis() + expTime;
+        synchronized (RabbitmqLogManager.class){
+            if(days != -1){
+                //如果之前存在封禁情况的话，删除之前的队列消息
+                Long lockedTime = user.getIsLock();
+                if(lockedTime != 0)rabbitTemplate.convertAndSend("CancelExchange","CancelForbidRouting",userId.toString() +lockedTime.toString());
+                //添加现有的新消息
+                rabbitTemplate.convertAndSend("ForbidExchange", "UserForbidRouting", userId + "::" + lockUntil, message -> {
+                    message.getMessageProperties().setExpiration(String.valueOf(expTime));
+                    message.getMessageProperties().setMessageId(userId.toString() + lockUntil.toString());
+                    return message;
+                });
+                //日志记录
+                rabbitmqLogManager.writeLog(true,userId + " " + lockUntil);
+            }
         }
         //封禁与返回结果
-        user.setIsLock(lockTime);
+        user.setIsLock(lockUntil);
         return userService.updateById(user) ? R.success("用户封禁成功") : R.failure("用户封禁失败");
     }
 
@@ -284,8 +289,13 @@ public class UserController {
         User user = userService.getById(userId);
         if(user == null)return R.failure("未找到相关用户");
         //删除消息队列里延迟队列消息
-        Long lockedTime = user.getIsLock();
-        if(lockedTime != 0)rabbitTemplate.convertAndSend("CancelExchange","CancelForbidRouting",lockedTime);
+        synchronized (RabbitmqLogManager.class){
+            Long lockedTime = user.getIsLock();
+            if(lockedTime != 0)rabbitTemplate.convertAndSend("CancelExchange","CancelForbidRouting",
+                    userId.toString() + lockedTime.toString());
+            //日志记录
+            rabbitmqLogManager.writeLog(false,userId + " " + lockedTime);
+        }
         //解封与返回结果
         user.setIsLock(0L);
         return userService.updateById(user) ? R.success("用户解封成功") : R.failure("用户解封失败");
