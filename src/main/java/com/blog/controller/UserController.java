@@ -1,22 +1,34 @@
 package com.blog.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.component.RabbitmqLogManager;
+import com.blog.entity.Blog;
+import com.blog.entity.Comment;
+import com.blog.entity.Mail;
 import com.blog.entity.User;
+import com.blog.mapper.BlogMapper;
+import com.blog.mapper.CommentMapper;
+import com.blog.mapper.MailMapper;
+import com.blog.service.BlogService;
+import com.blog.service.CommentService;
+import com.blog.service.MailService;
 import com.blog.service.UserService;
 import com.blog.utils.BaseContext;
 import com.blog.utils.EncryptUtil;
 import com.blog.dao.R;
 import com.blog.utils.RedisUtil;
+import com.rabbitmq.client.LongString;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
@@ -38,9 +50,17 @@ public class UserController {
     @Resource
     private UserService userService;
     @Resource
+    private BlogMapper blogMapper;
+    @Resource
+    private CommentMapper commentMapper;
+    @Resource
+    private MailMapper mailMapper;
+    @Resource
     private RabbitmqLogManager rabbitmqLogManager;
     @Resource
     private RedisTemplate redisTemplate;
+    @Resource
+    private RedisTemplate redisTemplate_2;
     @Resource
     private RedisTemplate redisTemplate_3;
 
@@ -199,17 +219,41 @@ public class UserController {
 
     //修改指定id用户信息
     @PostMapping("/upd")
+    @Transactional
     @ApiOperation(value = "修改指定id用户信息", notes = "修改自己的信息")
-    public R<String> updateById( User user){
+    public R<String> updateById(@RequestBody User user){
         //权限判定
-        if(BaseContext.getIsAdmin() || !Objects.equals(BaseContext.getCurrentId(), user.getId()))
+        Long uid = user.getId();
+        if(BaseContext.getIsAdmin() || !Objects.equals(BaseContext.getCurrentId(), uid))
             return R.failure("该id不是你的用户id，你无权操作");
         //正式执行
         log.info("正在修改用户的信息: 用户id={},用户信息={}",user.getId(),user);
         //修改用户信息
-        User u = userService.getById(user.getId());
+        User u = userService.getById(uid);
         if(u == null) return R.failure("用户的id不存在");
         user.setPassword(u.getPassword());
+        user.setUsername(u.getUsername());
+        //如果修改了昵称，用户昵称相关的一切都要修改
+        String newName = user.getName();
+        if(!u.getName().equals(newName)){
+            //博客
+            UpdateWrapper<Blog> blogUpdateWrapper = new UpdateWrapper<>();
+            blogMapper.update(null,blogUpdateWrapper.eq("user_id",uid).set("user_name",newName));
+            //评论
+            UpdateWrapper<Comment> commentUpdateWrapper = new UpdateWrapper<>();
+            commentMapper.update(null,commentUpdateWrapper.eq("user_id",uid).set("user_name",newName));
+            //邮箱
+            UpdateWrapper<Mail> mailUpdateWrapper = new UpdateWrapper<>();
+            mailMapper.update(null,mailUpdateWrapper.eq("from_id",uid).set("from_name",newName));
+            //删除博客、评论相关缓存
+            Set<String> keys = redisTemplate_2.keys("blog*");
+            if(keys != null && !keys.isEmpty())redisTemplate_2.delete(keys);
+            keys = redisTemplate_2.keys("comment*");
+            if(keys != null && !keys.isEmpty())redisTemplate_2.delete(keys);
+            keys = redisTemplate_2.keys("share*");
+            if(keys != null && !keys.isEmpty())redisTemplate_2.delete(keys);
+        }
+        //处理
         boolean success = userService.updateById(user);
         //返回结果
         return success ? R.success("修改用户信息成功") : R.failure("修改用户信息失败");
@@ -300,4 +344,5 @@ public class UserController {
         user.setIsLock(0L);
         return userService.updateById(user) ? R.success("用户解封成功") : R.failure("用户解封失败");
     }
+
 }

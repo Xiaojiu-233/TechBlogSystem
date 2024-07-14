@@ -7,8 +7,14 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 @Configuration
 public class RedisConfig extends CachingConfigurerSupport {
+
+    //redis公共的互斥锁资源
+    public static Lock reenLock = new ReentrantLock();
 
     //调用数据库0的redisTemplate（登录凭证缓存）
     @Bean("redisTemplate")

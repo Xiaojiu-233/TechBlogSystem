@@ -2,6 +2,7 @@ package com.blog.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.blog.config.RedisConfig;
 import com.blog.entity.Blog;
 import com.blog.entity.Likes;
 import com.blog.entity.view.LikesList;
@@ -66,17 +67,29 @@ public class LikesServiceImpl extends ServiceImpl<LikesMapper, Likes> implements
         //点赞体的总点赞数
         ValueOperations op2 = redisTemplate_2.opsForValue();
         Integer count = (Integer) op2.get("likes" + likesId);
-        if(count != null){
-            rets[1] = count;return rets;
-        }else{
-            //读数据库
-            storeLike();
-            LambdaQueryWrapper<LikesList> countWrapper = new LambdaQueryWrapper<>();
-            rets[1] = likesListMapper.selectCount(countWrapper);
-            //写入点赞数访问缓存，保存2天
-            op2.set("likes" +  likesId,rets[1],2, TimeUnit.DAYS);
+        if(count == null){
+            //使用互斥锁解决缓存击穿和缓存穿透问题
+            while(true) {
+                if (RedisConfig.reenLock.tryLock()) {
+                    //读数据库
+                    storeLike();
+                    LambdaQueryWrapper<LikesList> countWrapper = new LambdaQueryWrapper<>();
+                    rets[1] = likesListMapper.selectCount(countWrapper);
+                    //写入点赞数访问缓存，保存2天
+                    op2.set("likes" + likesId, rets[1], 2, TimeUnit.DAYS);
+                    //解放锁，结束循环
+                    RedisConfig.reenLock.unlock();
+                    break;
+                } else {
+                    //取锁失败则查看缓存，如果依然没有就等一会儿再尝试取锁
+                    count = (Integer) op2.get("likes" + likesId);
+                    if(count != null){try {Thread.sleep(100);}
+                    catch (InterruptedException e) {throw new RuntimeException(e);}
+                    } else break;
+                }
+            }
         }
-
+        rets[1] = count;
         //返回结果
         return rets;
     }

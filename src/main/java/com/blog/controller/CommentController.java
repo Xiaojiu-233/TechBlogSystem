@@ -3,11 +3,14 @@ package com.blog.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.blog.dao.BlogDto;
+import com.blog.dao.CommentDto;
 import com.blog.entity.Blog;
 import com.blog.entity.Comment;
 import com.blog.entity.User;
 import com.blog.service.BlogService;
 import com.blog.service.CommentService;
+import com.blog.service.LikesService;
 import com.blog.service.UserService;
 import com.blog.utils.BaseContext;
 import com.blog.dao.R;
@@ -15,10 +18,15 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 //评论的管理控制器
 @Slf4j
@@ -29,15 +37,16 @@ public class CommentController {
 
     @Resource
     private CommentService commentService;
-
     @Resource
     private UserService userService;
-
     @Resource
     private BlogService blogService;
-
+    @Resource
+    private LikesService likesService;
     @Resource
     private RabbitTemplate rabbitTemplate;
+    @Resource
+    private RedisTemplate redisTemplate_2;
 
     //////////数据处理//////////
 
@@ -88,6 +97,17 @@ public class CommentController {
         //分页查询，结果返回给pageInfo
         commentService.page(pageInfo,queryWrapper);
 
+        //进行dto装填处理
+        Page<CommentDto> dtoPage = new Page<>();
+        BeanUtils.copyProperties(pageInfo,dtoPage,"records");
+        List<CommentDto> list = pageInfo.getRecords().stream().map((item)-> {
+            CommentDto dto = new CommentDto();BeanUtils.copyProperties(item,dto);
+            Integer[] ret = likesService.getLike(item.getLikesId(),BaseContext.getCurrentId());
+            dto.setLikeNum(ret[1]);dto.setLikeState(ret[0]);
+            return  dto;
+        }).collect(Collectors.toList());
+        dtoPage.setRecords(list);
+
         //返回结果
         return R.success(pageInfo);
     }
@@ -98,20 +118,8 @@ public class CommentController {
     public R<Page> blogpage(int page, int pageSize, Long blogId){
         //正式执行
         log.info("正在进行分页查询 页数={} 页大小={} 查询博客id={}",page,pageSize,blogId);
-        //构造分页构造器
-        Page<Comment> pageInfo = new Page(page,pageSize);
-
-        //构造条件构造器
-        LambdaQueryWrapper<Comment> queryWrapper = new LambdaQueryWrapper<>();
-        //添加过滤条件
-        queryWrapper.eq(Comment::getBlogId,blogId);
-        //添加排序条件
-        queryWrapper.orderByDesc(Comment::getCreateTime);
-        //分页查询，结果返回给pageInfo
-        commentService.page(pageInfo,queryWrapper);
-
         //返回结果
-        return R.success(pageInfo);
+        return R.success(commentService.listToDtoByBlog(page,pageSize,blogId));
     }
 
     //创建评论
@@ -167,6 +175,10 @@ public class CommentController {
         //转发评论
         comment.setShare(comment.getShare()+1);
         boolean success = commentService.updateById(comment);
+        //修改数据后缓存方面 mysql先写redis再删
+        redisTemplate_2.delete("share:c:" + comment.getId());
+        //存至redis缓存，随机过期时间缓解缓存雪崩
+        redisTemplate_2.opsForValue().set("share:c:" + comment.getId(),comment.getShare(),new Random().nextInt(100) + 200, TimeUnit.MINUTES);
         //返回结果
         return success ? R.success("评论转发成功") : R.failure("评论转发失败");
     }

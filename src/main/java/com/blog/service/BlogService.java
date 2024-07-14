@@ -10,5 +10,7 @@ public interface BlogService extends IService<Blog> {
 
     boolean CreateBlogAndSetLike(Blog blog);
 
+
+
     boolean DelBlogAndRemoveLike(List<Long> ids,Long userId,boolean isAdmin);
 }
