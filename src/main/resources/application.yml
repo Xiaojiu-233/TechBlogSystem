@@ -19,5 +19,9 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
 
+#用户自定义配置
+tourist:
+  path: D:/BlogSystemData
+
 
 
