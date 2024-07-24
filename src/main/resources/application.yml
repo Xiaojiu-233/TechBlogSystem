@@ -22,6 +22,7 @@ mybatis-plus:
 #用户自定义配置
 tourist:
   path: D:/BlogSystemData
+  ramqLog: D:/BlogSystemData/ramq/ramq_log.txt
 
 
 

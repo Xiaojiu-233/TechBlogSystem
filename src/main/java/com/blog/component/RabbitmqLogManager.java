@@ -5,6 +5,7 @@ import com.blog.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -27,7 +28,8 @@ public class RabbitmqLogManager {
     private AmqpAdmin amqpAdmin;
 
     //日志路径
-    private final String LOG_PATH = "src/main/resources/ramq_log.txt";
+    @Value("${tourist.ramqLog}")
+    private String LOG_PATH;
 
     //更新日志
     public void updateLog(){

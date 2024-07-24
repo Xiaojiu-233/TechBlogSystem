@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>博客管理平台登录</title>
+  <link  rel="stylesheet" th:href="@{/css/login.css}" href="../css/login.css"> <!-- 引用外部CSS文件 -->
+  <script th:src="@{/js/request.js}" src="../js/request.js"></script>
+</head>
+<body>
+    <div class="login-page">
+      <div class="background">
+        <img th:src="@{/img/background.png}" src="../img/background.png"/>
+      </div>
+      <div class="login-container">
+        <h2>欢迎来到博客管理平台</h2>
+        <form id="login-form">
+          <div class="input-group">
+            <label for="username">用户名</label>
+            <input type="text" id="username" name="username" required>
+          </div>
+          <div class="input-group">
+            <label for="password">密码</label>
+            <input type="password" id="password" name="password" required>
+          </div>
+          <button type="submit" onclick="formSubmit(2,'login-form','/ts/user/login',
+          function(){window.location.href = 'index.html'})">登录</button>
+          <button style="background-color: rgb(44, 197, 197);" type="submit" onclick="window.location.href = 'register.html'">注册</button>
+        </form>
+      </div>
+    </div>
+  
+  </body>
+</html>

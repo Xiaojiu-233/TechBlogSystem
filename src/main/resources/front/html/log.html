@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>游记界面</title>
+  <link  rel="stylesheet" th:href="@{/css/table.css}" href="../css/table.css"> <!-- 引用外部CSS文件 -->
+  <link  th:href="@{/css/bootstrap.min.css}" href="../css/bootstrap.min.css">
+  <script th:src="@{/js/jquery.min.js}" src="../js/jquery.min.js"></script>
+  <script th:src="@{/js/bootstrap-paginator.min.js}" src="../js/bootstrap-paginator.min.js"></script>
+  <script th:src="@{/js/request.js}" src="../js/request.js"></script>
+  <script th:src="@{/js/table.js}" src="../js/table.js"></script>
+</head>
+
+<div class="container">
+  <div class="toolbar">
+    <div class="title-left">
+      <h2>游记</h2>
+    </div>
+    <div class="title-right">
+      <button id="addUserBtn" onclick="window.location.href = 'logForm.html'">+ 写游记</button>
+      <input type="text" id="search-logName" placeholder="标题搜索">
+      <button id="searchBtn" onclick="SetPage(2,'/ts/touristLog/userpage',1,20,['logName'],'InputData_Log')">搜索</button>
+    </div>
+  </div>
+
+  <div id="log-body" class="grid">
+  </div>
+
+    <div id="paginator-container"></div>
+  </div>
+
+  <script>
+    SetPage(2,'/ts/touristLog/userpage',1,20,[],'InputData_Log');
+  </script>
+  
+</div>
+
+</body>
+</html>

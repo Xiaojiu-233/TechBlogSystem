@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>评论界面</title>
+  <link  rel="stylesheet" th:href="@{/css/table.css}" href="../css/table.css"> <!-- 引用外部CSS文件 -->
+  <link  th:href="@{/css/bootstrap.min.css}" href="../css/bootstrap.min.css">
+  <script th:src="@{/js/jquery.min.js}" src="../js/jquery.min.js"></script>
+  <script th:src="@{/js/bootstrap-paginator.min.js}" src="../js/bootstrap-paginator.min.js"></script>
+  <script th:src="@{/js/request.js}" src="../js/request.js"></script>
+  <script th:src="@{/js/table.js}" src="../js/table.js"></script>
+</head>
+
+<div class="container">
+  <div class="toolbar">
+    <div class="title-left">
+      <h2>评论管理</h2>
+    </div>
+    <div class="title-right">
+      <button class="redBtn" onclick="multiDel('comment')">批量删除</button>
+      <input type="text" id="search-blogId" placeholder="博客号搜索">
+      <input type="text" id="search-userId" placeholder="用户号搜索">
+      <button id="searchBtn" onclick="SetPage('/blog/comment/page',1,10,['blogId','userId'],'InputData_Comment')">搜索</button>
+    </div>
+  </div>
+
+  <div class="pagination-table">
+    <table>
+      <thead>
+        <tr>
+          <th class="littleTh">复选</th> 
+          <th>评论编号</th>
+          <th>博客编号</th>
+          <th>评论者编号</th>
+          <th>评论者昵称</th>
+          <th>内容</th>
+          <th>分享数</th>
+          <th>创建时间</th>
+          <th>删除</th>
+        </tr>
+      </thead>
+      <tbody id="comment-body">
+      </tbody>
+    </table>
+
+    <div id="paginator-container"></div>
+  </div>
+
+  <script>
+    SetPage('/blog/comment/page',1,10,['blogId','userId'],'InputData_Comment');
+  </script>
+  
+</div>
+
+</body>
+</html>

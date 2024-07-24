@@ -60,7 +60,7 @@ public class BlogController {
         LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
         //添加过滤条件
         queryWrapper.like(StringUtils.isNotBlank(title),Blog::getTitle,title);
-        queryWrapper.eq(Blog::getUserId,userId);
+        queryWrapper.eq(userId != null,Blog::getUserId,userId);
         //添加排序条件
         queryWrapper.orderByDesc(Blog::getCreateTime);
         //不用检索text

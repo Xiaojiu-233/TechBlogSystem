@@ -65,8 +65,8 @@ public class CommentController {
         //构造条件构造器
         LambdaQueryWrapper<Comment> queryWrapper = new LambdaQueryWrapper<>();
         //添加过滤条件
-        queryWrapper.eq(Comment::getUserId,userId);
-        queryWrapper.eq(Comment::getBlogId,blogId);
+        queryWrapper.eq(userId!= null,Comment::getUserId,userId);
+        queryWrapper.eq(blogId!= null,Comment::getBlogId,blogId);
         //添加排序条件
         queryWrapper.orderByDesc(Comment::getCreateTime);
         //分页查询，结果返回给pageInfo
@@ -91,7 +91,7 @@ public class CommentController {
         LambdaQueryWrapper<Comment> queryWrapper = new LambdaQueryWrapper<>();
         //添加过滤条件
         queryWrapper.eq(Comment::getUserId,BaseContext.getCurrentId());
-        queryWrapper.eq(Comment::getBlogId,blogId);
+        queryWrapper.eq(blogId!= null,Comment::getBlogId,blogId);
         //添加排序条件
         queryWrapper.orderByDesc(Comment::getCreateTime);
         //分页查询，结果返回给pageInfo

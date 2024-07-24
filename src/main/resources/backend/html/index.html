@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>博客管理系统后台</title>
+  <link  rel="stylesheet" th:href="@{/css/index.css}" href="../css/index.css"> <!-- 引用外部CSS文件 -->
+  <script  th:src="@{/js/request.js}" src="../js/request.js"></script>
+  <script  th:src="@{/js/index.js}" src="../js/index.js"></script>
+  <script th:src="@{/js/table.js}" src="../js/table.js"></script>
+</head>
+
+  <header>
+    <h1>博客管理系统</h1>
+    <div class="corner">
+      <div id="empName" style="margin-right: 20px;">用户名</div>
+      <a style="margin-right: 10px;" onclick="goBack()">登出</a>
+    </div>
+  </header>
+
+
+
+  <div class="container">
+    <nav>
+      <ul>
+        <li><button class="nav-button" onclick="changeIframe('user')">用户管理</button></li>
+        <li><button class="nav-button" onclick="changeIframe('blog')">博客管理</button></li>
+        <li><button class="nav-button" onclick="changeIframe('comment')">评论管理</button></li>
+        <li><button class="nav-button" onclick="changeIframe('report')">举报管理</button></li>
+        <li><button class="nav-button" onclick="changeIframe('notice')">通知管理</button></li>
+        <li><button class="nav-button" onclick="changeIframe('emp')">管理员管理</button></li>
+        <li><button class="nav-button" onclick="getRetData('/blog/common/fixramq').then(data => {alert(data)})">紧急修复ramq</button></li>
+      </ul>
+    </nav>
+
+    <!-- 子页面 --> 
+    <iframe id="IFrame" th:src="@{/html/user.html}" src="user.html" width="100%" height="600px"></iframe>
+
+  </div>
+
+</body>
+</html>

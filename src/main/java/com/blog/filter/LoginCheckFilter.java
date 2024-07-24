@@ -58,7 +58,16 @@ public class LoginCheckFilter implements Filter {
                 "/doc.html",
                 "/webjars/**",
                 "/swagger-resources",
-                "/v2/api-docs"
+                "/v2/api-docs",
+                "/front/css/**",
+                "/front/img/**",
+                "/front/js/**",
+                "/",
+                "/front/html/login.html",
+                "/backend/css/**",
+                "/backend/img/**",
+                "/backend/js/**",
+                "/backend/html/login.html",
         };
 
         //添加请求头解决cors问题

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>景点界面</title>
+  <link  rel="stylesheet" th:href="@{/css/table.css}" href="../css/table.css"> <!-- 引用外部CSS文件 -->
+  <link  th:href="@{/css/bootstrap.min.css}" href="../css/bootstrap.min.css">
+  <script th:src="@{/js/jquery.min.js}" src="../js/jquery.min.js"></script>
+  <script th:src="@{/js/bootstrap-paginator.min.js}" src="../js/bootstrap-paginator.min.js"></script>
+  <script th:src="@{/js/request.js}" src="../js/request.js"></script>
+  <script th:src="@{/js/table.js}" src="../js/table.js"></script>
+</head>
+
+<div class="container">
+  <div class="toolbar">
+    <div class="title-left">
+      <h2>景点</h2>
+    </div>
+    <div class="title-right">
+      <input type="text" id="search-spotName" placeholder="景点名搜索">
+      <button id="searchBtn" onclick="SetPage(1,'/ts/spot/userpage',1,20,['spotName'],'InputData_Spot')">搜索</button>
+    </div>
+  </div>
+
+  <div id="spot-body" class="grid">
+  </div>
+
+    <div id="paginator-container"></div>
+  </div>
+
+  <script>
+    SetPage(1,'/ts/spot/userpage',1,20,['spotName'],'InputData_Spot');
+  </script>
+  
+</div>
+
+</body>
+</html>

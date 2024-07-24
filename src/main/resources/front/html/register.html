@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>旅游管理平台注册</title>
+  <link  rel="stylesheet" th:href="@{/css/login.css}" href="../css/login.css"> <!-- 引用外部CSS文件 -->
+  <script th:src="@{/js/request.js}" src="../js/request.js"></script>
+  <script th:src="@{/js/form.js}" src="../js/form.js"></script>
+</head>
+<body>
+    <div class="login-page">
+      <div class="background">
+        <img th:src="@{/img/background.png}" src="../img/background.png"/>
+      </div>
+      <div class="login-container">
+        <h2>来注册一个账号吧！</h2>
+        <form id="register-form">
+          <div class="input-group">
+            <label for="name">用户昵称:</label>
+            <input type="text" id="name" name="name">
+          </div>
+          <div class="input-group">
+            <label for="username">账号:</label>
+            <input type="text" id="username" name="username">
+          </div>
+          <div class="input-group">
+            <label for="password">密码:</label>
+            <input type="password" id="password" name="password">
+          </div>
+          <div class="input-group">
+            <label for="phone">联系方式:</label>
+            <input type="tel" id="phone" name="phone">
+          </div>
+          <div class="input-group">
+            <label for="sex">性别:</label>
+            <select id="sex" name="sex" required>
+                <option value="0">男</option>
+                <option value="1">女</option>
+            </select>
+          </div>
+          <button type="submit" onclick="window.location.href = 'login.html'">登录</button>
+          <button style="background-color: rgb(44, 197, 197);" type="submit" onclick="formSubmit_user(2,'/ts/user')">注册</button>
+        </form>
+      </div>
+    </div>
+  
+  </body>
+</html>

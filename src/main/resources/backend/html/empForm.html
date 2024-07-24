@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>添加管理员信息</title>
+  <link  rel="stylesheet" th:href="@{/css/form.css}" href="../css/form.css"> <!-- 引用外部CSS文件 -->
+  <script th:src="@{/js/request.js}" src="../js/request.js"></script>
+</head>
+<body>
+  <div class="header">
+    <button id="exitButton" onclick="back('emp')">退出</button>
+    <h1>添加管理员信息</h1>
+  </div>
+
+  <form id="InpForm">
+    <div class="input-row">
+      <label for="username">用户名:</label>
+      <input type="text" id="username" name="username">
+    </div>
+    <div class="input-row">
+      <label for="password">密码:</label>
+      <input type="password" id="password" name="password">
+    </div>
+
+    <input type="submit" value="提交" onclick="formSubmit_emp(0,'/ts/employee')">
+  </form>
+
+  <script th:src="@{/js/form.js}" src="../js/form.js">
+  </script>
+  <script>    setMessage(0,'/ts/employee/');</script>
+
+</body>
+</html>

@@ -1,0 +1,206 @@
+
+/* 基本样式 */
+.container {
+  width: 90%;
+  margin-left: 3%;
+}
+
+/* 标题和按钮样式 */
+.header {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title-left h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.title-right {
+  display: flex;
+  align-items: center;
+}
+
+/* 输入框和按钮样式 */
+/* 输入框样式 */
+.title-right input[type="text"] {
+  padding: 8px 10px; /* 与按钮高度相同 */
+  border: 1px solid #ccc;
+  border-radius: 3px; /* 圆润的边角 */
+  font-size: 14px;
+  margin-right: 10px;
+  height: 38px; /* 调整输入框高度 */
+  width:150px;
+  box-sizing: border-box; /* 边框在内部 */
+}
+
+.title-right button {
+  margin-right: 10px;
+  padding: 8px 15px; /* 调整按钮尺寸 */
+  border: none;
+  border-radius: 3px; /* 更精致的圆角 */
+  background-color: #3498db;
+  color: white;
+  font-size: 14px; /* 改变字体大小 */
+  cursor: pointer;
+}
+.title-right .redBtn {
+  background-color: #d0571a;
+}
+.title-right .greenBtn {
+  background-color: #4abd1d;
+}
+
+.title-right button:hover {
+  background-color: #2980b9;
+}
+.title-right .redBtn:hover {
+  background-color: #f38933;
+}
+.title-right .greenBtn:hover {
+  background-color: #49f333;
+}
+
+
+.choiceBtn {
+  padding: 8px 8px; /* 调整按钮尺寸 */
+  border: none;
+  border-radius: 3px; /* 更精致的圆角 */
+  background-color: #f73e00;
+  color: white;
+  font-size: 14px; /* 改变字体大小 */
+  cursor: pointer;
+}
+.choiceBtn.green {
+  background-color: #16c609;
+}
+.choiceBtn.pink {
+  background-color: #c60997;
+}
+.choiceBtn.gray {
+  background-color: #656565;
+}
+
+.choiceBtn:hover {
+  background-color: #e49138;
+}
+.choiceBtn.green:hover {
+  background-color: #8af940;
+}
+.choiceBtn.pink:hover {
+  background-color: #da20ac;
+}
+.choiceBtn.gray:hover {
+  background-color: #8d8d8d;
+}
+
+
+/* 表格样式 */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th, table td {
+  padding: 1px;
+  text-align: left;
+  border-bottom: 1px solid #ddd; /* 下边框线 */
+  max-width: 120px;
+  min-width: 50px;
+  max-height: 100px; 
+}
+
+table th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+table td {
+  overflow: auto;
+  white-space: nowrap;
+}
+
+.flowTd{
+  white-space: nowrap; /* 防止文本换行 */
+  overflow: hidden;
+  text-overflow: ellipsis; /* 超出范围时使用省略号显示 */
+  cursor: pointer; /* 添加光标样式，表示可点击 */
+  color: #00eeff;
+}
+
+.details-popup {
+  display: none;
+  position: absolute;
+  white-space: normal;
+  top: 40%;
+  left: 40%;
+  color: #000;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  background-color: white;
+  border: 1px solid #ddd;
+  padding: 10px;
+  max-width: 300px; /* 设置详情弹窗的最大宽度 */
+}
+
+/* 隔行变色 */
+table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* 分页器 */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pagination li {
+  display: inline-block; 
+  margin-right: 5px;
+}
+
+.pagination li a {
+  color: #000;
+  border: 1px solid #ccc;
+  padding: 5px 10px;
+  text-decoration: none;
+  border-radius: 3px;
+}
+
+.pagination li.active a {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+
+.pagination li a:hover {
+  background-color: #33eeff;
+}
+
+/* 图 */
+img{
+  width: 100px; height: 100px;object-fit: cover;
+}
+
+
+.littleTh{
+  min-width: 30px;
+}

@@ -1,0 +1,207 @@
+
+/* 基本样式 */
+.container {
+  width: 90%;
+  margin-left: 3%;
+}
+
+/* 标题和按钮样式 */
+.header {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title-left h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.title-right {
+  display: flex;
+  align-items: center;
+}
+
+/* 输入框和按钮样式 */
+/* 输入框样式 */
+.title-right input[type="text"] {
+  padding: 8px 10px; /* 与按钮高度相同 */
+  border: 1px solid #ccc;
+  border-radius: 3px; /* 圆润的边角 */
+  font-size: 14px;
+  margin-right: 10px;
+  height: 38px; /* 调整输入框高度 */
+  width:150px;
+  box-sizing: border-box; /* 边框在内部 */
+}
+
+.title-right button {
+  margin-right: 10px;
+  padding: 8px 15px; /* 调整按钮尺寸 */
+  border: none;
+  border-radius: 3px; /* 更精致的圆角 */
+  background-color: #3498db;
+  color: white;
+  font-size: 14px; /* 改变字体大小 */
+  cursor: pointer;
+}
+.title-right .redBtn {
+  background-color: #d0571a;
+}
+.title-right .greenBtn {
+  background-color: #4abd1d;
+}
+
+.title-right button:hover {
+  background-color: #2980b9;
+}
+.title-right .redBtn:hover {
+  background-color: #f38933;
+}
+.title-right .greenBtn:hover {
+  background-color: #49f333;
+}
+
+
+.choiceBtn {
+  padding: 8px 8px; /* 调整按钮尺寸 */
+  border: none;
+  border-radius: 3px; /* 更精致的圆角 */
+  background-color: #f73e00;
+  color: white;
+  font-size: 14px; /* 改变字体大小 */
+  cursor: pointer;
+}
+.choiceBtn.green {
+  background-color: #16c609;
+}
+.choiceBtn.pink {
+  background-color: #c60997;
+}
+.choiceBtn.gray {
+  background-color: #656565;
+}
+
+.choiceBtn:hover {
+  background-color: #e49138;
+}
+.choiceBtn.green:hover {
+  background-color: #8af940;
+}
+.choiceBtn.pink:hover {
+  background-color: #da20ac;
+}
+.choiceBtn.gray:hover {
+  background-color: #8d8d8d;
+}
+
+
+/* 样式设置为 Flexbox 布局 */
+.grid {
+  display: flex;
+  flex-wrap: wrap; /* 让内容换行 */
+  gap: 10px; /* 设置网格间距 */
+}
+
+.spot {
+  flex: 0 1 calc(20% - 20px);
+  background-color: #f9f9f9;
+  padding: 10px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.spot img {
+  width: 100%;
+  height: auto;
+  max-height: 150px;
+  object-fit: cover;
+}
+
+.spot p{
+  margin: 0;
+}
+
+/* 样式调整 */
+.spot p:nth-child(2) {
+  font-size: 20px; /* 景点名称更大 */
+  font-weight: bold; /* 加粗 */
+
+}
+
+.spot p:nth-child(3) {
+  font-size: 14px; /* 景点地址较小 */
+  color: #888; /* 更浅的颜色 */
+}
+
+.spot p:nth-child(4),
+.spot p:nth-child(5) {
+  font-size: 14px; /* 景点地址较小 */
+  display: inline-block; /* 使用 Flexbox 布局 */
+  justify-content: space-between; /* 左右对齐 */
+  padding-right: 10px;
+}
+
+/* 分页器 */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pagination li {
+  display: inline-block; 
+  margin-right: 5px;
+}
+
+.pagination li a {
+  color: #000;
+  border: 1px solid #ccc;
+  padding: 5px 10px;
+  text-decoration: none;
+  border-radius: 3px;
+}
+
+.pagination li.active a {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+
+.pagination li a:hover {
+  background-color: #33eeff;
+}
+
+/* 图 */
+img{
+  width: 100px; height: 100px;object-fit: cover;
+  display: flex;
+}
+
+
+.littleTh{
+  min-width: 30px;
+}
+
+.hiddenText{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 200px;
+}

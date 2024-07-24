@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>添加修改通知信息</title>
+  <link  rel="stylesheet" th:href="@{/css/form.css}" href="../css/form.css"> <!-- 引用外部CSS文件 -->
+  <script th:src="@{/js/request.js}" src="../js/request.js"></script>
+</head>
+<body>
+  <div class="header">
+    <button id="exitButton" onclick="back('spot')">退出</button>
+    <h1>添加修改通知信息</h1>
+  </div>
+
+  <form id="InpForm">
+    <div class="input-row">
+      <label for="name">通知名:</label>
+      <input type="text" id="name" name="name">
+    </div>
+    <div class="input-row">
+      <label for="address">通知地址:</label>
+      <input type="text" id="address" name="address">
+    </div>
+    <div class="input-row">
+      <label for="price">通知票价:</label>
+      <input type="number" id="price" step="0.01" name="price">
+    </div>
+    <div class="input-row">
+      <label for="tickets">通知票数:</label>
+      <input type="number" id="tickets" name="tickets">
+    </div>
+    <div class="input-row">
+      <label for="photos">配图:</label>
+      <input type="file" id="photos" name="photos" accept="image/*">
+    </div>
+    <div class="input-row">
+      <label for="describes">通知介绍:</label>
+      <textarea  id="describes" name="describes"></textarea>
+    </div>
+    <div class="input-row">
+      <label for="route">通知路线:</label>
+      <input type="text" id="route" name="route">
+    </div>
+    <div class="input-row">
+      <label for="maxTickets">最大票数:</label>
+      <input type="number" id="maxTickets" name="maxTickets">
+    </div>
+
+    <input type="submit" value="提交" onclick="formSubmit_sh(1,'/ts/spot','Spot')">
+  </form>
+
+  <script th:src="@{/js/form.js}" src="../js/form.js">
+  </script>
+      <script>    setMessage(1,'/ts/spot/');</script>
+
+</body>
+</html>

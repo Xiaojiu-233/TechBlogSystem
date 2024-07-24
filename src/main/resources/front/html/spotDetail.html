@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>景点详情</title>
+    <link rel="stylesheet" href="/css/detail.css">
+    <script th:src="@{/js/request.js}" src="../js/request.js"></script>
+    <script th:src="@{/js/table.js}" src="../js/table.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="left-section">
+            <div class="titleBox">
+                <button id="backButton">返回</button>
+                <h1>景点详情</h1>
+            </div>
+            <div class="spot-bigmsg">
+                <img id="inp_img" onerror="this.onerror=null;"  this.src="'/img/OIP.jpg';" src="" alt="找不到图片" />
+                <div class="spot-message">
+                    <h2 id="inp_name">景点名称</h2>
+                    <p id="inp_spotId">景点号：</p>
+                    <p id="inp_address">景点地址：</p>
+                    <p id="inp_describes" class="scroll-text">景点介绍：</p>
+                    <p id="inp_route">景点路线：</p>
+                    <p id="inp_score">景点评分：</p>
+                    <p style="font-weight: bold;" id="inp_price">景点票价：</p>
+                    <p id="inp_tickets">景点票数：</p>
+                </div>
+            </div>
+            <h2>附近的酒店</h2>
+            <div class="hotel-list"  id="leftSection">
+            </div>
+        </div>
+        <div>
+            <div class="right-section" id="rightSectionTop">
+                <h3>用户评论</h3>
+                <div class="comments-section"  id="comment-table">
+
+                </div>
+                <form id="comment-form">
+                    <label for="text">发表评论:</label>
+                    <textarea style="width: 330px;" id="text" name="text" rows="4"></textarea>
+                    <label for="score">评分:</label>
+                    <input type="number" id="score" name="score" min="1" max="10" required>
+                    <button type="submit" class="order-button" onclick="formSubmit_comment(2,'/ts/comment')">发表评论并评分</button>
+                </form> 
+
+            </div>
+            <div class="order-section">
+                <h2>订单信息</h2>
+                <form id="order-msg">
+                    <div style="display: flex;">订购景点：<div id="sname"></div></div>
+                    订购票数：<input type="number" id="tickets" name="tickets" value="0" min="0" max="10" oninput="changeAmount()" required>
+                    <div style="display: flex;">订购酒店：<div id="hname"></div></div>
+                    订购房间数：<input type="number" id="rooms" name="rooms"  value="0" min="0" max="10" oninput="changeAmount()" required>
+                    <div style="display: flex;">总价格：<div id="amount"></div>￥</div>
+                    <button  type="submit" id="orderButton" class="order-button"  onclick="formSubmit_order(2,'/ts/mqorder')">订购</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/detail.js"></script>
+</body>
+</html>

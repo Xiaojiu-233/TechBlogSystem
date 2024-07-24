@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>通知界面</title>
+  <link  rel="stylesheet" th:href="@{/css/table.css}" href="../css/table.css"> <!-- 引用外部CSS文件 -->
+  <link  th:href="@{/css/bootstrap.min.css}" href="../css/bootstrap.min.css">
+  <script th:src="@{/js/jquery.min.js}" src="../js/jquery.min.js"></script>
+  <script th:src="@{/js/bootstrap-paginator.min.js}" src="../js/bootstrap-paginator.min.js"></script>
+  <script th:src="@{/js/request.js}" src="../js/request.js"></script>
+  <script th:src="@{/js/table.js}" src="../js/table.js"></script>
+</head>
+
+<div class="container">
+  <div class="toolbar">
+    <div class="title-left">
+      <h2>通知管理</h2>
+    </div>
+    <div class="title-right">
+      <button class="redBtn" onclick="multiDel(1,'spot')">批量删除</button>
+      <button id="addUserBtn" onclick="changeFrame('notice',-1)">+ 添加通知</button>
+      <input type="text" id="search-spotName" placeholder="通知标题搜索">
+      <button id="searchBtn" onclick="SetPage(1,'/ts/spot/page',1,10,['spotName'],'InputData_Spot')">搜索</button>
+    </div>
+  </div>
+
+  <div class="pagination-table">
+    <table>
+      <thead>
+        <tr>
+          <th class="littleTh">复选</th> 
+          <th>通知编号</th>
+          <th>通知标题</th>
+          <th>内容</th>
+          <th>创建时间</th>
+          <th>删除</th>
+        </tr>
+      </thead>
+      <tbody id="spot-body">
+      </tbody>
+    </table>
+
+    <div id="paginator-container"></div>
+  </div>
+
+  <script>
+    SetPage(1,'/ts/spot/page',1,10,['spotName'],'InputData_Spot');
+  </script>
+  
+</div>
+
+</body>
+</html>

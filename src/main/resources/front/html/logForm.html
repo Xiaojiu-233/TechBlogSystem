@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>添加修改游记信息</title>
+  <link  rel="stylesheet" th:href="@{/css/form.css}" href="../css/form.css"> <!-- 引用外部CSS文件 -->
+  <script th:src="@{/js/request.js}" src="../js/request.js"></script>
+</head>
+<body>
+  <div class="header">
+    <button id="exitButton" onclick="back('log')">退出</button>
+    <h1>添加修改游记信息</h1>
+  </div>
+
+  <form id="InpForm">
+    <div class="input-row">
+      <label for="title">游记标题:</label>
+      <input type="text" id="title" name="title">
+    </div>
+    <div class="input-row">
+      <label for="photos">配图:</label>
+      <input type="file" id="photos" name="photos" accept="image/*">
+    </div>
+    <label for="text">游记正文:</label>
+    <div class="input-row">
+      <textarea style="height: 700px;width: 400px;margin-top: 30px;"  id="text" name="text"></textarea>
+    </div>
+
+    <input type="submit" value="提交" onclick="formSubmit_img2(2,'/ts/touristLog','TouristLog','photos')">
+  </form>
+
+  <script th:src="@{/js/form.js}" src="../js/form.js">
+    
+  </script>
+    <script>setMessage(2,'/ts/touristLog/');</script>
+
+</body>
+</html>

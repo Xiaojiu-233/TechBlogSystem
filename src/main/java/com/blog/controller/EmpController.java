@@ -126,12 +126,15 @@ public class EmpController {
 
     //管理员的id查询
     @GetMapping("/{id}")
-    @ApiOperation(value = "管理员的id查询", notes = "管理员的id查询")
+    @ApiOperation(value = "管理员的id查询", notes = "管理员的id查询,如果为-1就是自身")
     public R<Emp> getById(@PathVariable("id")Long id){
         //正式执行
         log.info("正在执行管理员的按id获取：{}",id);
         //获取管理员
-        Emp emp= empService.getById(id);
+        Emp emp = null;
+        if(id == -1 && BaseContext.getIsAdmin() && BaseContext.getCurrentId() != null)
+            emp = empService.getById(BaseContext.getCurrentId());
+        else  emp = empService.getById(id);
         //排除异常情况
         if(emp==null)return R.failure("管理员查询失败");
         //清除密码等隐蔽信息

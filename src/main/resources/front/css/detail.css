@@ -1,0 +1,241 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    margin: 0 auto;
+    max-width: 1200px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.titleBox{
+    display: flex;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    height: 50px;
+}
+
+.left-section {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.left-section h1 {
+    margin-left: 15px;
+    margin-top: 5px;
+}
+
+.left-section #backButton {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.left-section img {
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+
+.right-section {
+    flex: 1;
+    padding: 20px;
+    width: 300px;
+}
+
+.right-section#rightSectionTop {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.right-section#rightSectionBottom {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.right-section#rightSectionAngle {
+    margin-top: -70px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.right-section h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.right-section p {
+    margin-bottom: 10px;
+}
+
+.order-section {
+    padding: 10px;
+}
+
+.order-section h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.order-section p {
+    margin-bottom: 10px;
+}
+
+.order-button {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 250px;
+}
+
+.spot-message{
+    display: block;
+    margin-left: 25px;
+    margin-top: -25px;
+}
+
+.spot-bigmsg{
+    display: flex;
+    flex-direction: row;
+}
+
+.scroll-text{
+    max-width: 500px;
+    height: 100px;
+    overflow-y: auto;
+}
+
+.hotel-list{
+    width: 800px;
+    height: 280px;
+    background-color: #eaeaea;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* 样式设置为 Flexbox 布局 */
+.hotel-list {
+    display: flex;
+    gap: 10px; /* 设置网格间距 */
+  }
+  
+  .spot {
+    width: 200px;
+    height: 280px;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+  
+  .spot img {
+    width: 170px;
+    height: 140px;
+    object-fit: cover;
+  }
+  
+  .spot p{
+    margin: 0;
+  }
+  
+  /* 样式调整 */
+  .spot a:nth-child(2) {
+    font-size: 20px; /* 景点名称更大 */
+    font-weight: bold; /* 加粗 */
+  
+  }
+  
+  .spot p:nth-child(3) {
+    font-size: 14px; /* 景点地址较小 */
+    color: #888; /* 更浅的颜色 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .spot p:nth-child(4),
+  .spot p:nth-child(5) {
+    font-size: 14px; /* 景点地址较小 */
+    display: inline-block; /* 使用 Flexbox 布局 */
+    justify-content: space-between; /* 左右对齐 */
+    padding-right: 10px;
+  }
+
+.comments-section{
+    width: 350px;
+    height: 250px;
+    background-color: #eaeaea;
+    margin-bottom: 10px;
+    overflow-y: auto;
+}
+
+.comment-unit {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px;
+    max-height: 200px; /* 设置评论单元的最大高度，超出部分可以滚动 */
+    overflow-y: auto; /* 添加垂直滚动条 */
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.user-info img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.username {
+    font-weight: bold;
+}
+
+.like-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.comment-content {
+    height: 70px;
+    overflow-y: auto;
+}
+
+.comment-box{
+    display: flex;
+    justify-content: space-between;
+}
+
+.flex-box{
+    display: flex;
+    justify-content: space-between;
+}
+
+
+.actions{
+    margin-top: 8px;
+}
