@@ -17,10 +17,10 @@
       <h2>通知管理</h2>
     </div>
     <div class="title-right">
-      <button class="redBtn" onclick="multiDel(1,'spot')">批量删除</button>
+      <button class="redBtn" onclick="multiDel('mail/notice')">批量删除</button>
       <button id="addUserBtn" onclick="changeFrame('notice',-1)">+ 添加通知</button>
-      <input type="text" id="search-spotName" placeholder="通知标题搜索">
-      <button id="searchBtn" onclick="SetPage(1,'/ts/spot/page',1,10,['spotName'],'InputData_Spot')">搜索</button>
+      <input type="text" id="search-title" placeholder="通知标题搜索">
+      <button id="searchBtn" onclick="SetPage('/blog/mail/empNoticePage',1,10,['title'],'InputData_Notice')">搜索</button>
     </div>
   </div>
 
@@ -36,7 +36,7 @@
           <th>删除</th>
         </tr>
       </thead>
-      <tbody id="spot-body">
+      <tbody id="notice-body">
       </tbody>
     </table>
 
@@ -44,7 +44,7 @@
   </div>
 
   <script>
-    SetPage(1,'/ts/spot/page',1,10,['spotName'],'InputData_Spot');
+    SetPage('/blog/mail/empNoticePage',1,10,['title'],'InputData_Notice');
   </script>
   
 </div>

@@ -46,7 +46,7 @@ public class Mail implements MessageReact<Mail> {
         if(ret.length < 6)return null;
         //数据装填
         this.id = IdWorker.getId();
-        this.userId = ret[1].equals("null") ? 0L : Long.parseLong(ret[1]);
+        this.userId = ret[1].equals("null") ? null : Long.parseLong(ret[1]);
         this.fromId = ret[2].equals("null") ? null : Long.parseLong(ret[2]);
         this.fromName = ret[3];
         this.title = ret[4];

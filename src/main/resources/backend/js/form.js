@@ -38,22 +38,26 @@ function formSubmit_sh(i,url,cate){
 
     });
 }
-function formSubmit_emp(i,url){
+function formSubmit_add(url){
     const Form = document.getElementById('InpForm');
-    const AdminCheck = document.getElementById('isAdmin');
     let formData = new FormData(Form);
-    formData.set('empId', Id);
-    formData.set('isAdmin', AdminCheck.checked? 1 : 0);
-    if(updateSubmit){
-        postData(i,url+'/update',formData).then(data => {
-            alert(data);
-        })
-    }else{
-        let jsonData = formDataToJson(formData);
-        postJsonData(i,url,jsonData,function(){
+    let jsonData = formDataToJson(formData);
+        postJsonData(url,jsonData,function(){
             location.reload();
         });
-    }
+
+}
+function formSubmit_upd(url){
+    //读取数据
+    idNum = Number(window.location.href.split('?')[1].split('=')[1]);
+    //提交
+    const Form = document.getElementById('InpForm');
+    let formData = new FormData(Form);
+    let jsonData = formDataToJson(formData);
+    jsonData['empId'] = idNum;
+    postJsonData(url,jsonData,function(){
+        location.reload();
+    });
 
 }
 function back(url){

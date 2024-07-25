@@ -1,3 +1,6 @@
+//数据
+dict = {"博客":"blog","评论":"comment"};
+
 //方法
 async function SetPage(Url,curPage,pageSize,args,func){
   //请求数据处理
@@ -31,47 +34,34 @@ async function SetPage(Url,curPage,pageSize,args,func){
   });
 
 }
-function del(i,elem,id){
-  var url = '/ts/' + elem + '/del/' + id;
+function del(elem,id){
+  var url = '/blog/' + elem + '/del/' + id;
   var confirmation = confirm(`确定要删除编号为${id}的元素吗？`);
   if (confirmation) {
-    postJsonData(i,url,null,function(){
+    postJsonData(url,null,function(){
       location.reload();
     });
   } 
 }
-function unable(i,elem,id){
-  var url = '/ts/' + elem + '/unable/' + id;
-  var confirmation = confirm(`确定要无效化编号为${id}的元素吗？`);
+function unable(elem,id){
+  var url = '/blog/' + elem + '/reject/' + id;
+  var confirmation = confirm(`确定要驳回编号为${id}的元素吗？`);
   if (confirmation) {
-    postJsonData(i,url,null,function(){
+    postJsonData(url,null,function(){
       location.reload();
     });
   } 
 }
-function used(i,elem,id){
-  var url = '/ts/' + elem + '/used/' + id;
-  var confirmation = confirm(`确定要使用完成编号为${id}的元素吗？`);
+function used(elem,id,tar){
+  var url = '/blog/' + elem + '/handle/' + id;
+  var confirmation = confirm(`确定要处理编号为${id}的元素吗？`);
   if (confirmation) {
-    postJsonData(i,url,null,function(){
-      location.reload();
-    });
-  } 
-}
-function recover(id){
-  const num = prompt("请输入您要恢复的博客房间数：", 1);
-
-  if (num !== null) {
-    if (isNonNegativeInteger(num)) {
-      var url = `/ts/hotel/recover?hid=${id}&num=${num}`;
-      postJsonData(1,url,null,function(){
+    postJsonData('/blog/' + dict[tar] + '/del/' + id,null,function(){
+      postJsonData(url,null,function(){
         location.reload();
       });
-    } else {
-      alert("请输入一个非负整数！");
-    }
-  }
-
+    });
+  } 
 }
 function lock(id){
   var num = prompt(`确定要封禁编号为${id}的用户吗？请确定封禁天数，数量为-1则代表永封`,0);
@@ -94,16 +84,7 @@ function unlock(id){
     });
   } 
 }
-function admin(id,isLock,isAdmin){
-  var url = `/ts/employee/update?empId=${id}&status=${isLock?1 :0}&isAdmin=${isAdmin?0 :1}`;
-  var confirmation = confirm(`确定要${isAdmin? '解除' :'添加'}编号为${id}的管理员权限吗？`);
-  if (confirmation) {
-    postJsonData(0,url,null,function(){
-      location.reload();
-    });
-  } 
-}
-function multiDel(i,elem){
+function multiDel(elem){
   const elements = document.querySelectorAll('[id^="op_"]');
   const idNumbers = [];
   elements.forEach(element => {
@@ -121,57 +102,7 @@ function multiDel(i,elem){
     var url = '/blog/' + elem + '/del/' + id;
     var confirmation = confirm(`确定要删除编号为${id}的元素吗？`);
     if (confirmation) {
-      postJsonData(i,url,null,function(){
-        location.reload();
-      })
-    } 
-  }
-
-}
-function multiUnable(i,elem){
-  const elements = document.querySelectorAll('[id^="op_"]');
-  const idNumbers = [];
-  elements.forEach(element => {
-    if(element.checked){
-      const id = element.id; // 获取元素的id
-      const idNumber = id.split('_')[1]; // 获取编号部分并转换为数字
-      idNumbers.push(idNumber); // 将编号信息存储到数组中
-    }
-  });
-  console.log(idNumbers); // 输出存储的编号数组
-  if(idNumbers.length == 0)
-  alert('请在右侧复选框中选择元素！');
-  else{
-    var id = idNumbers.join(',');
-    var url = '/ts/' + elem + '/unable/' + id;
-    var confirmation = confirm(`确定要无效化编号为${id}的元素吗？`);
-    if (confirmation) {
-      postJsonData(i,url,null,function(){
-        location.reload();
-      })
-    } 
-  }
-
-}
-function multiUsed(i,elem){
-  const elements = document.querySelectorAll('[id^="op_"]');
-  const idNumbers = [];
-  elements.forEach(element => {
-    if(element.checked){
-      const id = element.id; // 获取元素的id
-      const idNumber = id.split('_')[1]; // 获取编号部分并转换为数字
-      idNumbers.push(idNumber); // 将编号信息存储到数组中
-    }
-  });
-  console.log(idNumbers); // 输出存储的编号数组
-  if(idNumbers.length == 0)
-  alert('请在右侧复选框中选择元素！');
-  else{
-    var id = idNumbers.join(',');
-    var url = '/ts/' + elem + '/used/' + id;
-    var confirmation = confirm(`确定要确定使用编号为${id}的元素吗？`);
-    if (confirmation) {
-      postJsonData(i,url,null,function(){
+      postJsonData(url,null,function(){
         location.reload();
       })
     } 
@@ -267,23 +198,14 @@ function InputData_Emp(record){
   for (var rec of record){
     complexContent+= `
     <tr>
-      <td><input type="checkbox" id="op_${rec.empId}"></td>
-      <td>${rec.empId}</td>
+      <td><input type="checkbox" id="op_${rec.id}"></td>
+      <td>${rec.id}</td>
       <td>${rec.username}</td>
-      <td>${rec.name}</td>
-      <td>${rec.career}</td>
-      <td>${rec.status == 0 ? '正常' : '封禁'}</td>
       <td>${rec.createTime}</td>
-      <td>${rec.updateTime}</td>
-      <td>${rec.createEmp}</td>
-      <td>${rec.updateEmp}</td>
-      <td>${rec.isAdmin? '是' : '否'}</td>
-      <td><button class="choiceBtn green" onclick="changeFrame('emp','${rec.empId}')">修改</button></td>
-      <td><button class="choiceBtn" onclick="del(0,'employee','${rec.empId}')">删除</button></td>
-      <td><button class="choiceBtn gray" onclick="lock('${rec.empId}',${rec.status == 1},${rec.isAdmin})">
-      ${rec.status == 0 ? '封禁' : '解封'}</button></td>
-      <td><button class="choiceBtn pink" onclick="admin('${rec.empId}',${rec.status == 1},${rec.isAdmin})">
-      ${rec.isAdmin? '解除管理员' : '设置管理员'}</button></td>
+      <td>${rec.loginTime}</td>
+      <td>${rec.id == 1 ? '是' : '否'}</td>
+      <td><button class="choiceBtn green" onclick="window.location.href = './empUpd.html?eid=${rec.id}'">修改</button></td>
+      <td><button class="choiceBtn gray" onclick="del('emp','${rec.id}')">删除</button></td>
     </tr>
     `;
   }
@@ -292,28 +214,49 @@ function InputData_Emp(record){
   // 使用 innerHTML 插入复杂的内容
   myDiv.innerHTML = complexContent;
 }
-function InputData_Log(record){
+function InputData_Notice(record){
   var complexContent = '';
   // 开始渲染
   for (var rec of record){
     complexContent+= `
     <tr>
-      <td><input type="checkbox" id="op_${rec.logId}"></td>
-      <td>${rec.logId}</td>
-      <td>${rec.userId}</td>
+      <td><input type="checkbox" id="op_${rec.id}"></td>
+      <td>${rec.id}</td>
       <td>${rec.title}</td>
-      <td><img onerror="this.onerror=null;  this.src='../img/OIP.jpg';"
-      src="${getImgUrl(rec.photos)}" alt="找不到图片" /></td>
       <td class="flowTd" onclick="showDetailsPopup(this)">${rec.text}
         <div class="details-popup">${rec.text}</div>
       </td>
       <td>${rec.createTime}</td>
-      <td><button class="choiceBtn" onclick="del(2,'touristLog','${rec.logId}')">删除</button></td>
+      <td><button class="choiceBtn" onclick="del('mail/notice','${rec.id}')">删除</button></td>
     </tr>
     `;
   }
   // 获取 div 元素
-  const myDiv = document.getElementById('log-body');
+  const myDiv = document.getElementById('notice-body');
+  // 使用 innerHTML 插入复杂的内容
+  myDiv.innerHTML = complexContent;
+}
+function InputData_Report(record){
+  var complexContent = '';
+  // 开始渲染
+  for (var rec of record){
+    complexContent+= `
+    <tr>
+      <td>${rec.id}</td>
+      <td>${rec.target}</td>
+      <td>${rec.targetId}</td>
+      <td>${rec.userId}</td>
+      <td class="flowTd" onclick="showDetailsPopup(this)">${rec.text}
+        <div class="details-popup">${rec.text}</div>
+      </td>
+      <td>${rec.createTime}</td>
+      <td><button class="choiceBtn green" onclick="used('report',${rec.id},'${rec.target}')">处理</button></td>
+      <td><button class="choiceBtn red" onclick="unable('report',${rec.id},'${rec.target}')">驳回</button></td>
+    </tr>
+    `;
+  }
+  // 获取 div 元素
+  const myDiv = document.getElementById('report-body');
   // 使用 innerHTML 插入复杂的内容
   myDiv.innerHTML = complexContent;
 }

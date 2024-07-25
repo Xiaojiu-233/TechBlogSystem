@@ -77,7 +77,7 @@ public class MailController {
 
     //读取自己的通知邮件
     @GetMapping("/noticepage")
-    @ApiOperation(value = "邮件的本用户分页查询(通知邮件)", notes = "查看自己的邮件，可以通过邮件标题模糊查询")
+    @ApiOperation(value = "邮件的分页查询(通知邮件)", notes = "查看自己的邮件，可以通过邮件标题模糊查询")
     public R<Page> noticepage(int page, int pageSize, String title){
         //权限判定
         if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
@@ -97,6 +97,32 @@ public class MailController {
         queryWrapper.isNull(Mail::getUserId);
         queryWrapper.ge(Mail::getCreateTime,user.getRegisterTime());
         queryWrapper.select(Mail::getId,Mail::getCreateTime,Mail::getTitle,Mail::getFromName,Mail::getFromId,Mail::getIsRead,Mail::getUserId);
+        //添加排序条件
+        queryWrapper.orderByDesc(Mail::getCreateTime);
+        //分页查询，结果返回给pageInfo
+        mailService.page(pageInfo,queryWrapper);
+
+        //返回结果
+        return R.success(pageInfo);
+    }
+
+    //读取通知邮件
+    @GetMapping("/empNoticePage")
+    @ApiOperation(value = "邮件的分页查询(通知邮件)", notes = "管理员权限")
+    public R<Page> empNoticePage(int page, int pageSize, String title){
+        //权限判定
+        if(!BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
+            return R.failure("该操作需要管理员来进行，你无权操作");
+        //正式执行
+        log.info("正在进行分页查询 页数={} 页大小={} 查询邮件名={}",page,pageSize,title);
+        //构造分页构造器
+        Page<Mail> pageInfo = new Page(page,pageSize);
+
+        //构造条件构造器
+        LambdaQueryWrapper<Mail> queryWrapper = new LambdaQueryWrapper<>();
+        //添加过滤条件（不需要展示text）
+        queryWrapper.like(StringUtils.isNotBlank(title),Mail::getTitle,title);
+        queryWrapper.isNull(Mail::getUserId);
         //添加排序条件
         queryWrapper.orderByDesc(Mail::getCreateTime);
         //分页查询，结果返回给pageInfo
@@ -174,6 +200,24 @@ public class MailController {
         return success ? R.success("邮件删除成功") : R.failure("邮件删除失败");
     }
 
+    //删除通知邮件
+    @PostMapping("/notice/del/{ids}")
+    @ApiOperation(value = "删除通知邮件", notes = "删除通知邮件")
+    public R<String> delNotice(@PathVariable("ids") List<Long> ids){
+        //权限判定
+        if(!BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
+            return R.failure("该操作需要管理员来进行，你无权操作");
+        //正式执行
+        log.info("正在执行邮件的删除: {}",ids);
+        //删除邮件 只要有一个删除成功就是成功
+        LambdaQueryWrapper<Mail> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Mail::getId,ids);
+        if(mailService.count(queryWrapper) == 0)return R.failure("邮件删除失败");
+        boolean success = mailService.remove(queryWrapper);
+        //返回结果
+        return success ? R.success("邮件删除成功") : R.failure("邮件删除失败");
+    }
+
     //管理员群发邮件(通知)
     @PostMapping("/group")
     @ApiOperation(value = "管理员群发邮件(通知)", notes = "管理员权限")
@@ -184,10 +228,12 @@ public class MailController {
         //正式执行
         log.info("正在执行邮件的群发送: {}",mail);
         //创建并发送群邮件
-
-        boolean success = false;
+        mail.setId(IdWorker.getId());
+        mail.setFromName("管理员");
+        //邮件发送给消息队列
+        rabbitTemplate.convertAndSend("MailCacheExchange","MailCacheRouting",mail.objToMsg());
         //返回结果
-        return success ? R.success("通知邮件发送成功") : R.failure("通知邮件发送失败");
+        return  R.success("通知邮件发送成功") ;
     }
 
     //读取邮件数

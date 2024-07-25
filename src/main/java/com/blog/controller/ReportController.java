@@ -61,7 +61,7 @@ public class ReportController {
     //处理指定id的举报（先处理完内容再调用它）
     @PostMapping("/handle/{id}")
     @ApiOperation(value = "处理指定id的举报（先处理完内容再调用它）", notes = "管理员权限")
-    public R<String> handle(@PathVariable("id") Long id,String reason){
+    public R<String> handle(@PathVariable("id") Long id){
         //权限判定
         if(!BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要管理员来进行，你无权操作");
@@ -74,12 +74,36 @@ public class ReportController {
         boolean success = reportService.removeById(id);
         //将结果反馈给用户（通过邮箱通知，使用reason）
         if(success){
-            String msg = "您好，您对" + report.getTarget() +"（id为" + report.getTargetId() + "）的举报已成功受理，感谢您为美化社区环境做出的贡献！。";
+            String msg = "您好，您对" + report.getTarget() +"（id为" + report.getTargetId() + "）的举报已成功受理，感谢您为美化社区环境做出的贡献！";
             rabbitTemplate.convertAndSend("MailCacheExchange","MailCacheRouting",
                     new Mail(null,report.getUserId(),null,"管理员","举报受理通知",msg,0,null).objToMsg());
         }
         //返回结果
         return success ? R.success("举报处理成功") : R.failure("举报处理失败");
+    }
+
+    //驳回指定id的举报
+    @PostMapping("/reject/{id}")
+    @ApiOperation(value = "驳回指定id的举报", notes = "管理员权限")
+    public R<String> reject(@PathVariable("id") Long id){
+        //权限判定
+        if(!BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
+            return R.failure("该操作需要管理员来进行，你无权操作");
+        //正式执行
+        log.info("正在执行举报的驳回: {}",id);
+        //确定举报id是否存在
+        Report report = reportService.getById(id);
+        if(report == null) return  R.failure("该举报不存在");
+        //处理举报
+        boolean success = reportService.removeById(id);
+        //将结果反馈给用户（通过邮箱通知，使用reason）
+        if(success){
+            String msg = "您好，您对" + report.getTarget() +"（id为" + report.getTargetId() + "）的举报经过核实，发现不违反社区规定，已被驳回。";
+            rabbitTemplate.convertAndSend("MailCacheExchange","MailCacheRouting",
+                    new Mail(null,report.getUserId(),null,"管理员","举报受理通知",msg,0,null).objToMsg());
+        }
+        //返回结果
+        return success ? R.success("驳回处理成功") : R.failure("驳回处理失败");
     }
 
     //提交举报
@@ -95,8 +119,8 @@ public class ReportController {
         User user = userService.getById(BaseContext.getCurrentId());
         if(user == null)return R.failure("举报提交失败，因为用户不存在");
         String type = report.getTarget();
-        if(type == null ||  (!type.equals("用户") && !type.equals("评论")  && !type.equals("博客")))
-            return R.failure("举报提交失败，因为举报类型并非用户、评论、博客的一种");
+        if(type == null ||  ( !type.equals("评论")  && !type.equals("博客")))
+            return R.failure("举报提交失败，因为举报类型并非评论、博客的一种");
         //提交举报
         report.setId(IdWorker.getId());
         report.setUserId(BaseContext.getCurrentId());
@@ -104,8 +128,5 @@ public class ReportController {
         //返回结果
         return success ? R.success("举报提交成功") : R.failure("举报提交失败");
     }
-
-
-
 
 }

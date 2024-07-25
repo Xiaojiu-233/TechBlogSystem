@@ -17,12 +17,6 @@
       <h2>举报管理</h2>
     </div>
     <div class="title-right">
-      <button class="greenBtn" onclick="multiUsed(2,'order')">批量处理</button>
-      <button class="redBtn" onclick="multiUnable(2,'order')">批量驳回</button>
-      <input type="text" id="search-spotId" placeholder="博客号搜索">
-      <input type="text" id="search-hotelId" placeholder="评论号搜索">
-      <input type="text" id="search-userId" placeholder="用户号搜索">
-      <button id="searchBtn" onclick="SetPage(2,'/ts/order/page',1,10,['spotId','hotelId','userId'],'InputData_Order')">搜索</button>
     </div>
   </div>
 
@@ -30,10 +24,9 @@
     <table>
       <thead>
         <tr>
-          <th class="littleTh">复选</th> 
           <th>举报编号</th>
-          <th>评论编号</th>
-          <th>博客编号</th>
+          <th>举报目标</th>
+          <th>目标编号</th>
           <th>用户编号</th>
           <th>举报内容</th>
           <th>创建时间</th>
@@ -41,7 +34,7 @@
           <th>驳回</th>
         </tr>
       </thead>
-      <tbody id="order-body">
+      <tbody id="report-body">
       </tbody>
     </table>
 
@@ -49,7 +42,7 @@
   </div>
 
   <script>
-    SetPage(2,'/ts/order/page',1,10,['spotId','hotelId','userId'],'InputData_Order');
+    SetPage('/blog/report/page',1,10,[],'InputData_Report');
   </script>
   
 </div>

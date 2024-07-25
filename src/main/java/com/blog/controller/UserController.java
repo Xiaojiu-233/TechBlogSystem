@@ -262,7 +262,7 @@ public class UserController {
     //修改指定id用户密码
     @PostMapping("/updPwd")
     @ApiOperation(value = "修改指定id用户密码", notes = "修改自己的密码")
-    public R<String> updatePwdById(Long userId,String oldPwd,String newPwd){
+    public R<String> updatePwdById( Long userId,String oldPwd,String newPwd){
         //权限判定
         if(BaseContext.getIsAdmin() || !Objects.equals(BaseContext.getCurrentId(), userId))
             return R.failure("该id不是你的用户id，你无权操作");

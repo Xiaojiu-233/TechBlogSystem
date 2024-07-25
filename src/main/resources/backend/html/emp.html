@@ -17,10 +17,10 @@
       <h2>管理员管理</h2>
     </div>
     <div class="title-right">
-      <button class="redBtn" onclick="multiDel(0,'employee')">批量删除</button>
+      <button class="redBtn" onclick="multiDel('emp')">批量删除</button>
       <button id="addUserBtn" onclick="changeFrame('emp',-1)">+ 添加管理员</button>
-      <input type="text" id="search-empName" placeholder="编号搜索">
-      <button id="searchBtn" onclick="SetPage(0,'/ts/employee/page',1,10,['empName'],'InputData_Emp')">搜索</button>
+      <input type="text" id="search-username" placeholder="编号搜索">
+      <button id="searchBtn" onclick="SetPage('/blog/emp/page',1,10,['username'],'InputData_Emp')">搜索</button>
     </div>
   </div>
 
@@ -46,7 +46,7 @@
   </div>
 
   <script>
-    SetPage(0,'/ts/employee/page',1,10,['empName'],'InputData_Emp');
+    SetPage('/blog/emp/page',1,10,['username'],'InputData_Emp');
   </script>
   
 </div>

@@ -2,7 +2,10 @@ package com.blog.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.entity.Emp;
+import com.blog.entity.User;
 import com.blog.service.EmpService;
 import com.blog.utils.BaseContext;
 import com.blog.utils.EncryptUtil;
@@ -22,9 +25,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 //管理员的管理控制器
 @Slf4j
@@ -124,6 +129,36 @@ public class EmpController {
 
     //////////数据处理//////////
 
+    //管理员的分页查询(可以通过名字查询)
+    @GetMapping("/page")
+    @ApiOperation(value = "管理员的分页查询", notes = "可以通过名字查询")
+    public R<Page> page(int page, int pageSize, String name){
+        //权限判定
+        if(!BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
+            return R.failure("该操作需要管理员来进行，你无权操作");
+        log.info("正在进行分页查询 页数={} 页大小={} 查询用户名={}",page,pageSize,name);
+
+        //构造分页构造器
+        Page<Emp> pageInfo = new Page(page,pageSize);
+
+        //构造条件构造器
+        LambdaQueryWrapper<Emp> queryWrapper = new LambdaQueryWrapper<>();
+        //添加过滤条件
+        queryWrapper.like(StringUtils.isNotBlank(name),Emp::getUsername,name);
+        //添加排序条件
+        queryWrapper.orderByAsc(Emp::getCreateTime);
+        //分页查询，结果返回给pageInfo
+        empService.page(pageInfo,queryWrapper);
+
+        //部分数据不予公开，如：密码
+        List<Emp> empRecords = pageInfo.getRecords();
+        empRecords = empRecords.stream().peek(emp -> emp.setPassword("")).collect(Collectors.toList());
+        pageInfo.setRecords(empRecords);
+
+        //返回结果
+        return R.success(pageInfo);
+    }
+
     //管理员的id查询
     @GetMapping("/{id}")
     @ApiOperation(value = "管理员的id查询", notes = "管理员的id查询,如果为-1就是自身")
@@ -170,7 +205,7 @@ public class EmpController {
     //修改指定id管理员密码
     @PostMapping("/updPwd")
     @ApiOperation(value = "修改指定id管理员密码", notes = "修改密码，需要超级管理员root权限")
-    public R<String> updatePwdById(Long empId,String oldPwd,String newPwd){
+    public R<String> updatePwdById(@RequestParam Long empId,@RequestParam String oldPwd,@RequestParam String newPwd){
         //权限判定
         if(!BaseContext.getIsAdmin() || !BaseContext.getCurrentId().equals(1L))
             return R.failure("该操作需要超级管理员来进行，你无权操作");
@@ -194,9 +229,9 @@ public class EmpController {
     }
 
     //删除管理员
-    @PostMapping("/del")
+    @PostMapping("/del/{id}")
     @ApiOperation(value = "删除指定id管理员", notes = "需要超级管理员root权限，不能删除root")
-    public R<String> lockById(Long empId){
+    public R<String> lockById(@PathVariable("id") Long empId){
         //权限判定
         if(!BaseContext.getIsAdmin() || !BaseContext.getCurrentId().equals(1L))
             return R.failure("该操作需要超级管理员来进行，你无权操作");
