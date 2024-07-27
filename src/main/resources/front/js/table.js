@@ -1,5 +1,5 @@
 //方法
-async function SetPage(id,Url,curPage,pageSize,args,func){
+async function SetPage(Url,curPage,pageSize,args,func){
   //请求数据处理
   var url = Url;
   url += `?page=${curPage}&pageSize=${pageSize}`
@@ -8,7 +8,7 @@ async function SetPage(id,Url,curPage,pageSize,args,func){
     url += `&${arg}=${value}`
   }
   //发出请求
-  getRetData(id,url).then(data => {
+  getRetData(url).then(data => {
     console.log('获得数据:', data);
     // 在这里处理返回的数据
     callFunction(func,data.records);
@@ -20,7 +20,7 @@ async function SetPage(id,Url,curPage,pageSize,args,func){
       size: 'normal', // 或 'large'、'small'
       onPageClicked: function(e, originalEvent, type, page) {
         console.log(page);
-        SetPage(id,Url,page,pageSize,args,func)
+        SetPage(Url,page,pageSize,args,func)
         // 处理页面点击事件
       }
     });
@@ -31,7 +31,7 @@ async function SetPage(id,Url,curPage,pageSize,args,func){
   });
 
 }
-async function SetPage2(id,Url,curPage,pageSize,args,func){
+async function SetPage2(Url,curPage,pageSize,args,func){
   //请求数据处理
   var url = Url;
   url += `?page=${curPage}&pageSize=${pageSize}`
@@ -40,7 +40,7 @@ async function SetPage2(id,Url,curPage,pageSize,args,func){
     url += `&${arg}=${value}`
   }
   //发出请求
-  getRetData(id,url).then(data => {
+  getRetData(url).then(data => {
     console.log('获得数据:', data);
     // 在这里处理返回的数据
     callFunction(func,data.records);
@@ -52,7 +52,7 @@ async function SetPage2(id,Url,curPage,pageSize,args,func){
       size: 'normal', // 或 'large'、'small'
       onPageClicked: function(e, originalEvent, type, page) {
         console.log(page);
-        SetPage2(id,Url,page,pageSize,args,func)
+        SetPage2(Url,page,pageSize,args,func)
         // 处理页面点击事件
       }
     });
@@ -63,23 +63,23 @@ async function SetPage2(id,Url,curPage,pageSize,args,func){
   });
 
 }
-function del(i,elem,id){
-  var url = '/ts/' + elem + '/del/' + id;
-  var confirmation = confirm(`确定要删除编号为${id}的元素吗？`);
+function del(elem,id){
+  var url = '/blog/' + elem + '/del/' + id;
+  var confirmation = confirm(`确定要删除这个元素吗？`);
   if (confirmation) {
-    postJsonData(i,url,null,function(){
+    postJsonData(url,null,function(){
       location.reload();
     });
   } 
 }
-function delFunc(i,elem,id,func){
-  var url = '/ts/' + elem + '/del/' + id;
-  var confirmation = confirm(`确定要删除编号为${id}的元素吗？`);
+function delFunc(elem,id,func){
+  var url = '/blog/' + elem + '/del/' + id;
+  var confirmation = confirm(`确定要删除这个元素吗？`);
   if (confirmation) {
-    postJsonData(i,url,null,func);
+    postJsonData(url,null,func);
   } 
 }
-function multiDel(i,elem){
+function multiDel(elem){
   const elements = document.querySelectorAll('[id^="op_"]');
   const idNumbers = [];
   elements.forEach(element => {
@@ -94,10 +94,10 @@ function multiDel(i,elem){
   alert('请在右侧复选框中选择元素！');
   else{
     var id = idNumbers.join(',');
-    var url = '/ts/' + elem + '/del/' + id;
-    var confirmation = confirm(`确定要删除编号为${id}的元素吗？`);
+    var url = '/blog/' + elem + '/del/' + id;
+    var confirmation = confirm(`确定要删除这些元素吗？`);
     if (confirmation) {
-      postJsonData(i,url,null,function(){
+      postJsonData(url,null,function(){
         location.reload();
       })
     } 
@@ -128,22 +128,22 @@ function InputData_Spot(record){
   // 使用 innerHTML 插入复杂的内容
   myDiv.innerHTML = complexContent;
 }
-function InputData_Log(record){
+function InputData_Blog(record){
   var complexContent = '';
   // 开始渲染
   for (var rec of record){
     complexContent+= `
-    <div class="spot" onclick="window.location.href = './logDetail.html?id=${rec.logId}&li=${rec.likeCount}&ls=${rec.like}&a=${rec.author}'">
-      <img onerror="this.onerror=null;  this.src='/img/OIP.jpg';" src='${getImgUrl(rec.photos)}' alt="找不到图片" />
+    <div class="spot" onclick="window.location.href = './blogDetail.html?id=${rec.id}&li=${rec.likeNum}&share=${rec.share}&ls=${rec.likeState}&a=${rec.userName}'">
+      <img onerror="this.onerror=null;  this.src='/img/OIP.jpg';" src='${getImgUrl(rec.images)}' alt="找不到图片" />
       <p class="hiddenText">${rec.title}</p>
-      <p class="hiddenText">${rec.text}</p>
-      <p>作者：${rec.author}</p>
-      <p>点赞：${rec.likeCount}</p>
+      作者：<a class="hiddenText" href="./userSpace.html?id=${rec.userId}">${rec.userName}</a>
+      <p>点赞：${rec.likeNum}</p>
+      <p>转发：${rec.share}</p>
     </div>
     `;
   }
   // 获取 div 元素
-  const myDiv = document.getElementById('log-body');
+  const myDiv = document.getElementById('blog-body');
   // 使用 innerHTML 插入复杂的内容
   myDiv.innerHTML = complexContent;
 }

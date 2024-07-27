@@ -122,7 +122,7 @@ function InputData_User(record){
     complexContent+= `
     <tr>
       <td>${rec.id}</td>
-      <td>${rec.name}</td>
+      <td><a href="../../front/html/userSpace.html?id=${rec.id}">${rec.name}</a></td>
       <td>${rec.username}</td>
       <td><img onerror="this.onerror=null;  this.src='../img/OIP.jpg';"
        src="${getImgUrl(rec.headImg)}" alt="找不到图片" /></td>
@@ -152,9 +152,9 @@ function InputData_Blog(record){
     complexContent+= `
     <tr>
       <td><input type="checkbox" id="op_${rec.id}"></td>
-      <td>${rec.id}</td>
+      <td><a href="../../front/html/blogSimpleDetail.html?id=${rec.id}">${rec.id}</a></td>
       <td>${rec.title}</td>
-      <td>${rec.userName}</td>
+      <td><a href="../../front/html/userSpace.html?id=${rec.userId}">${rec.userName}</a></td>
       <td>${rec.userId}</td>
       <td>${rec.share}</td>
       <td>${rec.createTime}</td>
@@ -174,7 +174,7 @@ function InputData_Comment(record){
     complexContent+= `
     <tr>
       <td><input type="checkbox" id="op_${rec.id}"></td>
-      <td>${rec.id}</td>
+      <td><a href="../../front/html/blogSimpleDetail.html?id=${rec.blogId}">${rec.id}</a></td>
       <td>${rec.blogId}</td>
       <td>${rec.userId}</td>
       <td>${rec.userName}</td>
@@ -250,8 +250,8 @@ function InputData_Report(record){
         <div class="details-popup">${rec.text}</div>
       </td>
       <td>${rec.createTime}</td>
-      <td><button class="choiceBtn green" onclick="used('report',${rec.id},'${rec.target}')">处理</button></td>
-      <td><button class="choiceBtn red" onclick="unable('report',${rec.id},'${rec.target}')">驳回</button></td>
+      <td><button class="choiceBtn green" onclick="used('report','${rec.id}','${rec.target}')">处理</button></td>
+      <td><button class="choiceBtn red" onclick="unable('report','${rec.id}','${rec.target}')">驳回</button></td>
     </tr>
     `;
   }

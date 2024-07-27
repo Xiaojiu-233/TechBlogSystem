@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 //收藏的管理控制器
 @Slf4j
@@ -64,7 +66,7 @@ public class UserCollController {
         //根据情况确定收藏还是取消
         boolean success = isColl ? userCollService.remove(queryWrapper) : userCollService.save(userColl);
         //返回结果
-        return success ? R.success(!isColl ? "收藏":"取消收藏" + "成功") : R.failure(!isColl ? "收藏":"取消收藏" + "失败");
+        return success ? R.success((!isColl ? "收藏":"取消收藏") + "成功") : R.failure((!isColl ? "收藏":"取消收藏") + "失败");
     }
 
     //////////数据处理//////////
@@ -104,18 +106,20 @@ public class UserCollController {
     }
 
     //读取收藏数
-    @GetMapping("/count")
-    @ApiOperation(value = "读取某博客的收藏数", notes = "读取某博客的收藏数")
-    public R<Integer> count(Long blogId){
+    @GetMapping("/data")
+    @ApiOperation(value = "读取某博客的收藏数与收藏状态", notes = "第一个为收藏数，第二个为收藏状态")
+    public R<List<Integer>> data(Long blogId){
         //正式执行
         log.info("正在执行收藏的数量读取: 博客id={}",blogId);
-        int count = -1;
+        int count = -1,state = 0;
         //读取收藏数
         LambdaQueryWrapper<CollList> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(CollList::getBlogId,blogId);
         count = collListMapper.selectCount(queryWrapper);
+        if(!BaseContext.getIsAdmin() && BaseContext.getCurrentId() != null)
+        state = userCollService.count(new LambdaQueryWrapper<UserColl>().eq(UserColl::getBlogId,blogId).eq(UserColl::getUserId,BaseContext.getCurrentId()));
         //返回结果
-        return count > -1 ? R.success(count) : R.failure("收藏数量读取失败");
+        return count > -1 ? R.success(Arrays.asList(count, state)) : R.failure("收藏数据读取失败");
     }
 
 }

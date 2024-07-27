@@ -16,6 +16,7 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
         System.out.println("公共字段自动填充，插入时的元数据： " + metaObject);
         if(metaObject.hasSetter("createTime")) metaObject.setValue("createTime", LocalDateTime.now());
         if(metaObject.hasSetter("registerTime")) metaObject.setValue("registerTime", LocalDateTime.now());
+
     }
 
     //更新时自动填充

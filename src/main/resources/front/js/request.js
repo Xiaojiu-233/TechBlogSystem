@@ -1,11 +1,10 @@
 // JavaScript文件（script.js）
 
-//后端请求区 业务: 1后台 2旅游 3用户
-var baseUrl = ["http://localhost:8101","http://localhost:8201","http://localhost:8301"];
-const proxyUrl = '';
+//后端请求区
 var loadCat = false;
-function getData(i,url){
-  fetch( proxyUrl + baseUrl[i] + url,{
+var baseUrl = "http://localhost:8080";
+function getData(url){
+  fetch( baseUrl + url,{
     method: 'GET',
     credentials: 'include',
   }) // 替换成后端提供数据的端点
@@ -30,9 +29,9 @@ function getData(i,url){
     console.error('There has been a problem with your fetch operation:', error);
   });
 }
-function getRetData(i,url){
+function getRetData(url){
   return new Promise((resolve, reject) => {
-    fetch( proxyUrl + baseUrl[i] + url,{
+    fetch( baseUrl + url,{
       method: 'GET',
       credentials: 'include',
     }) // 替换成后端提供数据的端点
@@ -59,9 +58,9 @@ function getRetData(i,url){
   })
   
 }
-function postData(i,url,dt){
+function postData(url,dt){
   return new Promise((resolve, reject) => {
-    fetch( proxyUrl + baseUrl[i] + url,{
+    fetch( baseUrl + url,{
       method: 'POST',
       credentials: 'include',
       body: dt
@@ -88,9 +87,9 @@ function postData(i,url,dt){
     });
   })
 }
-function postFormData(i,url,dt){
+function postFormData(url,dt){
   return new Promise((resolve, reject) => {
-    fetch( proxyUrl + baseUrl[i] + url,{
+    fetch( baseUrl + url,{
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -120,8 +119,8 @@ function postFormData(i,url,dt){
     });
   })
 }
-function postJsonData(i,url,data,func){
-  fetch( proxyUrl + baseUrl[i] + url,{
+function postJsonData(url,data,func){
+  fetch( baseUrl + url,{
     method: 'POST',
     credentials: 'include',
     headers: {
@@ -150,8 +149,8 @@ function postJsonData(i,url,data,func){
     console.error('There has been a problem with your fetch operation:', error);
   });
 }
-function postRetJsonData(i,url,data){
-  fetch( proxyUrl + baseUrl[i] + url,{
+function postRetJsonData(url,data){
+  fetch( baseUrl + url,{
     method: 'POST',
     credentials: 'include',
     headers: {
@@ -179,15 +178,15 @@ function postRetJsonData(i,url,data){
     console.error('There has been a problem with your fetch operation:', error);
   });
 }
-function formSubmit(i,form,url,func){
+function formSubmit(form,url,func){
   const Form = document.getElementById(form);
   let formData = new FormData(Form);
   let jsonData = formDataToJson(formData);
-  postJsonData(i,url,jsonData,func);
+  postJsonData(url,jsonData,func);
 }
 function getImgUrl(url){
   if(!(url.includes('html')))
-    return baseUrl[1] + url;
+    return baseUrl + url;
   return url;
 }
 

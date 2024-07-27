@@ -205,7 +205,7 @@ public class EmpController {
     //修改指定id管理员密码
     @PostMapping("/updPwd")
     @ApiOperation(value = "修改指定id管理员密码", notes = "修改密码，需要超级管理员root权限")
-    public R<String> updatePwdById(@RequestParam Long empId,@RequestParam String oldPwd,@RequestParam String newPwd){
+    public R<String> updatePwdById(Long empId,String oldPwd,String newPwd){
         //权限判定
         if(!BaseContext.getIsAdmin() || !BaseContext.getCurrentId().equals(1L))
             return R.failure("该操作需要超级管理员来进行，你无权操作");
@@ -231,7 +231,7 @@ public class EmpController {
     //删除管理员
     @PostMapping("/del/{id}")
     @ApiOperation(value = "删除指定id管理员", notes = "需要超级管理员root权限，不能删除root")
-    public R<String> lockById(@PathVariable("id") Long empId){
+    public R<String> delById(@PathVariable("id") Long empId){
         //权限判定
         if(!BaseContext.getIsAdmin() || !BaseContext.getCurrentId().equals(1L))
             return R.failure("该操作需要超级管理员来进行，你无权操作");
@@ -244,7 +244,7 @@ public class EmpController {
         Emp emp = empService.getById(empId);
         if(emp == null)return R.failure("未找到相关管理员");
         //封禁与返回结果
-        return empService.removeById(empId) ? R.success("管理员封禁成功") : R.failure("管理员封禁失败");
+        return empService.removeById(empId) ? R.success("管理员删除成功") : R.failure("管理员删除失败");
     }
 
 

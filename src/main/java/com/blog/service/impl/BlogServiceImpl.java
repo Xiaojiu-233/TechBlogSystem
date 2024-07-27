@@ -12,6 +12,7 @@ import com.blog.entity.view.LikesList;
 import com.blog.mapper.BlogMapper;
 import com.blog.mapper.view.LikesListMapper;
 import com.blog.service.BlogService;
+import com.blog.service.CommentService;
 import com.blog.service.LikesService;
 import com.blog.service.UserCollService;
 import com.blog.utils.BaseContext;
@@ -35,6 +36,8 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
     @Resource
     private UserCollService userCollService;
     @Resource
+    private CommentService commentService;
+    @Resource
     private RabbitTemplate rabbitTemplate;
 
     //添加博客并设置点赞数据
@@ -49,7 +52,6 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
             queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(LikesList::getLikesId, likeId);
         } while (mapper.selectCount(queryWrapper) != 0);
-        blog.setUserId(BaseContext.getCurrentId());
         blog.setLikesId(likeId);
         //返回结果
         return save(blog);
@@ -72,14 +74,14 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
             //删除收藏信息
             LambdaQueryWrapper<UserColl> collQueryWrapper = new LambdaQueryWrapper<>();
             collQueryWrapper.eq(UserColl::getBlogId, b.getId());
-            if(!userCollService.remove(collQueryWrapper))continue;
+            userCollService.remove(collQueryWrapper);
             //删除点赞
             Long likeId = b.getLikesId();
             LambdaQueryWrapper<LikesList> queryWrapper1 = new LambdaQueryWrapper<>();
             queryWrapper1.eq(LikesList::getLikesId, likeId);
             LambdaQueryWrapper<Likes> queryWrapper2 = new LambdaQueryWrapper<>();
             queryWrapper2.eq(Likes::getId, likeId);
-            if(mapper.selectCount(queryWrapper1) > 0 && likesService.remove(queryWrapper2)){
+            if(mapper.selectCount(queryWrapper1) > 0 && commentService.DelBlogCommAndRemoveLike(b.getId()) && likesService.remove(queryWrapper2)){
                 //删除博客
                 Long bid = b.getId();
                 boolean deleted = getById(bid) != null && removeById(bid);

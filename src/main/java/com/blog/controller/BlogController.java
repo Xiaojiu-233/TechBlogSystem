@@ -10,6 +10,7 @@ import com.blog.entity.Blog;
 import com.blog.entity.User;
 import com.blog.service.BlogService;
 import com.blog.service.LikesService;
+import com.blog.service.UserCollService;
 import com.blog.service.UserService;
 import com.blog.utils.BaseContext;
 import com.blog.dao.R;
@@ -40,6 +41,8 @@ public class BlogController {
     private UserService userService;
     @Resource
     private LikesService likesService;
+    @Resource
+    private UserCollService userCollService;
     @Resource
     private RabbitTemplate rabbitTemplate;
     @Resource
@@ -182,9 +185,9 @@ public class BlogController {
     }
 
     //创建博客
-    @PostMapping
+    @PostMapping("/{time}")
     @ApiOperation(value = "创建博客", notes = "创建新的博客，参数targetDate存放延时发布的时间戳")
-    public R<String> save(@RequestBody Blog blog,@PathVariable Long targetDate){
+    public R<String> save(@RequestBody Blog blog,@PathVariable("time") Long targetDate){
         //权限判定
         if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要用户来进行，你无权操作");
@@ -199,8 +202,11 @@ public class BlogController {
         blog.setUserName(user.getName());
         //发送给消息队列
         Long delayTime;
-        if(targetDate != null) delayTime = targetDate - System.currentTimeMillis();
+        if(targetDate > 0) delayTime = targetDate - System.currentTimeMillis();
         else delayTime = 1L;
+        //确定时间
+        if(delayTime < 0) return R.failure("延迟时间太短了或者在当今时间之前，请选择比当前日期迟2-3分钟的的时间");
+        //执行
         rabbitTemplate.convertAndSend("BlogPublishExchange", "BlogPublishRouting", blog.objToMsg(), message -> {
             message.getMessageProperties().setExpiration(String.valueOf(delayTime));
             return message;

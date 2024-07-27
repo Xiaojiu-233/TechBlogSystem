@@ -53,7 +53,6 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(LikesList::getLikesId, likeId);
         } while (mapper.selectCount(queryWrapper) != 0);
-        comment.setUserId(BaseContext.getCurrentId());
         comment.setLikesId(likeId);
         //comment相关缓存 指向的是comment所在的blog的id 修改数据后缓存方面 mysql先写redis再删
         redisTemplate_2.delete("comment:" + comment.getBlogId());
@@ -79,9 +78,10 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             Long likeId = c.getLikesId();
             LambdaQueryWrapper<LikesList> queryWrapper1 = new LambdaQueryWrapper<>();
             queryWrapper1.eq(LikesList::getLikesId, likeId);
-            LambdaQueryWrapper<Likes> queryWrapper2 = new LambdaQueryWrapper<>();
-            queryWrapper2.eq(Likes::getId, likeId);
-            if(mapper.selectCount(queryWrapper1) > 0 && likesService.remove(queryWrapper2)){
+            if(mapper.selectCount(queryWrapper1) > 0 ){
+                //删除残存点赞信息
+                LambdaQueryWrapper<Likes> queryWrapper2 = new LambdaQueryWrapper<>();
+                queryWrapper2.eq(Likes::getId, likeId);likesService.remove(queryWrapper2);
                 //删除评论
                 Long cid = c.getId();
                 boolean deleted = getById(cid) != null && removeById(cid);
@@ -103,6 +103,40 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             //comment相关缓存 指向的是comment所在的blog的id 修改数据后缓存方面 mysql先写redis再删
             for(Long id : ids) redisTemplate_2.delete("comment:" + c.getBlogId());
         }
+        return success;
+    }
+
+    //删除某博客下评论并移除点赞数据
+    @Override
+    @Transactional
+    public boolean DelBlogCommAndRemoveLike(Long blogId) {
+        //执行内容（一个一个删除）
+        //构造条件构造器搜寻目标
+        LambdaQueryWrapper<Comment> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(blogId != null,Comment::getBlogId,blogId);
+        if(count(queryWrapper) == 0)return true;
+        //获取所有的评论然后一个一个删，先删除点赞，再删除评论
+        List<Comment> list = list(queryWrapper);
+        boolean success = false;
+        for(Comment c : list){
+            //删除点赞
+            Long likeId = c.getLikesId();
+            LambdaQueryWrapper<LikesList> queryWrapper1 = new LambdaQueryWrapper<>();
+            queryWrapper1.eq(LikesList::getLikesId, likeId);
+            if(mapper.selectCount(queryWrapper1) > 0 ){
+                //删除残存点赞信息
+                LambdaQueryWrapper<Likes> queryWrapper2 = new LambdaQueryWrapper<>();
+                queryWrapper2.eq(Likes::getId, likeId);likesService.remove(queryWrapper2);
+                //删除评论
+                Long cid = c.getId();
+                boolean deleted = getById(cid) != null && removeById(cid);
+                if(deleted){
+                    success = true;
+                }
+            }
+        }
+        //comment相关缓存 指向的是comment所在的blog的id 修改数据后缓存方面 mysql先写redis再删
+        redisTemplate_2.delete("comment:" + blogId);
         return success;
     }
 

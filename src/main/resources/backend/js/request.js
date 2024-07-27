@@ -199,6 +199,13 @@ function formDataToJson(formData) {
   console.log(json);
   return json;  
 }  
+function formDataToStr(formData) {  
+  let str = "?";
+  for (let [key, value] of formData.entries()) {  
+      str += key + "=" + value + "&";
+  }  
+  return str.slice(0,-1);  
+}  
 
 //初始化执行区
 document.addEventListener('submit', function(event) {

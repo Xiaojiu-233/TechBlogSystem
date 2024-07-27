@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>博客平台</title>
+  <title>Tech博客</title>
   <script src="/js/request.js"></script>
   <link rel="stylesheet" href="/css/index.css"> <!-- 引入CSS文件 -->
   <script src="/js/index.js"></script> <!-- 引入JavaScript文件 -->
@@ -11,8 +11,8 @@
 
   <header>
     <div class="title">
-      <h1>博客管理平台</h1>
-      <p>发现博客之美</p>
+      <h1>Tech博客</h1>
+      <p>来找找有共同兴趣的朋友们吧！</p>
     </div>
     <div class="corner">
       <img id="userImg" onerror="this.onerror=null;  this.src='/img/OIP.jpg';" src='${getImgUrl(rec.photos)}' alt="找不到图片" />
@@ -20,15 +20,15 @@
       <a style="margin-right: 10px;" onclick="goBack()">登出</a>
     </div>
     <nav>
-      <button class="nav-btn" onclick="showContent('spot')">看景点</button>
-      <button class="nav-btn" onclick="showContent('log')">看游记</button>
+      <button class="nav-btn" onclick="showContent('blog')">看博客</button>
+      <button id="mail_num" class="nav-btn" onclick="showContent('mail')">看消息(0)</button>
       <button class="nav-btn" onclick="showContent('my')">我的</button>
     </nav>
   </header>
 
   <iframe id="contentFrame" src="attractions.html" frameborder="0"></iframe>
 
-  <script>showContent('spot')</script>
+  <script>showContent('blog')</script>
 
 </body>
 </html>

@@ -6,10 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.component.RabbitmqLogManager;
-import com.blog.entity.Blog;
-import com.blog.entity.Comment;
-import com.blog.entity.Mail;
-import com.blog.entity.User;
+import com.blog.entity.*;
 import com.blog.mapper.BlogMapper;
 import com.blog.mapper.CommentMapper;
 import com.blog.mapper.MailMapper;
@@ -178,12 +175,15 @@ public class UserController {
 
     //用户的id查询
     @GetMapping("/{id}")
-    @ApiOperation(value = "用户的id查询", notes = "用户的id查询")
+    @ApiOperation(value = "用户的id查询", notes = "用户的id查询,如果为-1就是自身")
     public R<User> getById(@PathVariable("id")Long id){
         //正式执行
         log.info("正在执行用户的按id获取：{}",id);
         //获取用户
-        User user= userService.getById(id);
+        User user = null;
+        if(id == -1 && !BaseContext.getIsAdmin() && BaseContext.getCurrentId() != null)
+            user = userService.getById(BaseContext.getCurrentId());
+        else  user = userService.getById(id);
         //排除异常情况
         if(user==null)return R.failure("用户查询失败");
         //清除密码等隐蔽信息

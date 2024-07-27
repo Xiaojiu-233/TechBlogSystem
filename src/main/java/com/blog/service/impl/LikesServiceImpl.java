@@ -71,19 +71,19 @@ public class LikesServiceImpl extends ServiceImpl<LikesMapper, Likes> implements
             //使用互斥锁解决缓存击穿和缓存穿透问题
             while(true) {
                 if (RedisConfig.reenLock.tryLock()) {
+                    log.info("获取到点赞的 读取数据库程序 的锁");
                     //读数据库
                     storeLike();
-                    LambdaQueryWrapper<LikesList> countWrapper = new LambdaQueryWrapper<>();
-                    rets[1] = likesListMapper.selectCount(countWrapper);
+                    count = likesListMapper.selectOne(new LambdaQueryWrapper<LikesList>().eq(LikesList::getLikesId, likesId)).getLikesNum();
                     //写入点赞数访问缓存，保存2天
-                    op2.set("likes" + likesId, rets[1], 2, TimeUnit.DAYS);
+                    op2.set("likes" + likesId, count, 2, TimeUnit.DAYS);
                     //解放锁，结束循环
                     RedisConfig.reenLock.unlock();
                     break;
                 } else {
                     //取锁失败则查看缓存，如果依然没有就等一会儿再尝试取锁
                     count = (Integer) op2.get("likes" + likesId);
-                    if(count != null){try {Thread.sleep(100);}
+                    if(count != null){try {Thread.sleep(1);}
                     catch (InterruptedException e) {throw new RuntimeException(e);}
                     } else break;
                 }

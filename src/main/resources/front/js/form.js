@@ -3,15 +3,16 @@ var Id = 0;
 var ImgValue = '';
 
 //方法
-function formSubmit_img(i,url,cate,img){
+function formSubmit_img(url,cate,img){
     const Form = document.getElementById('InpForm');
     var fileInput = document.getElementById(img);
+
     let formData1 = new FormData(Form);
     if(fileInput.files.length == 0 ){
         if(updateSubmit){
             formData1.set(cate.toLowerCase()+'Id', Id);
             formData1.set(img, ImgValue);
-            postData(i,url+'/update',formData1).then(data => {
+            postData(url+'/update',formData1).then(data => {
                 alert(data);
             })
             return;
@@ -20,13 +21,14 @@ function formSubmit_img(i,url,cate,img){
             return;
         }
     }
+
     let formData2 = new FormData();
     formData2.append('file', fileInput.files[0]);
-    postData(1,'/ts/common/upload/'+cate,formData2).then(data => {
+    postData('/ts/common/upload/'+cate,formData2).then(data => {
         formData1.set(img, '/ts/common/download/'+data);
         if(updateSubmit){
             formData1.set(cate.toLowerCase()+'Id', Id);
-            postData(i,url+'/update',formData1).then(data => {
+            postData(url+'/update',formData1).then(data => {
                 alert(data);
             })
         }else{
@@ -38,17 +40,18 @@ function formSubmit_img(i,url,cate,img){
 
     });
 }
-function formSubmit_img2(i,url,cate,img){
+function formSubmit_img2(url,cate,img){
     const Form = document.getElementById('InpForm');
     var uid = getParameterByName('uid');
     var fileInput = document.getElementById(img);
+    
     let formData1 = new FormData(Form);
     if(fileInput.files.length == 0 ){
         if(updateSubmit){
             formData1.set('userId', uid);
-            formData1.set('logId', Id);
+            formData1.set('id', Id);
             formData1.set(img, ImgValue);
-            postData(i,url+'/update',formData1).then(data => {
+            postData(url+'/upd',formData1).then(data => {
                 alert(data);
             })
             return;
@@ -57,36 +60,40 @@ function formSubmit_img2(i,url,cate,img){
             return;
         }
     }
+
     let formData2 = new FormData();
     formData2.append('file', fileInput.files[0]);
-    postData(1,'/ts/common/upload/'+cate,formData2).then(data => {
-        formData1.set(img, '/ts/common/download/'+data);
+    postData('/blog/common/upload/'+cate,formData2).then(data => {
+        formData1.set(img, '/blog/common/download/'+data);
+        console.log('是否为更新上传' + updateSubmit);
         if(updateSubmit){
             formData1.set('userId', uid);
-            formData1.set('logId', Id);
-            postData(i,url+'/update',formData1).then(data => {
+            formData1.set('id', Id);
+            postData(url+'/upd',formData1).then(data => {
                 alert(data);
             })
         }else{
             let jsonData = formDataToJson(formData1);
-            postJsonData(i,url,jsonData,function(){
+            var time = new Date(jsonData.targetTime).getTime();
+            if(isNaN(time)){time = 0}
+            postJsonData(url+`/${time}`,jsonData,function(){
                 location.reload();
             });
         }
 
     });
 }
-function formSubmit_user(i,url){
+function formSubmit_user(url){
     const Form = document.getElementById('register-form');
     let formData = new FormData(Form);
     if(updateSubmit){
         formData.set('userId', Id);
-        postData(i,url+'/update',formData).then(data => {
+        postData(url+'/update',formData).then(data => {
             alert(data);
         })
     }else{
         let jsonData = formDataToJson(formData);
-        postJsonData(i,url,jsonData,function(){
+        postJsonData(url,jsonData,function(){
             window.location.href = './login.html'
         });
     }
@@ -108,14 +115,15 @@ function getParameterByName(name, url) {
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
-function setMessage(i,url){
+function setMessage(url){
     //读取参数
     var id = getParameterByName('id');
     Id = id;
+    console.log('id:'+id);
     //进行处理
-    if(id != -1){
+    if(id != null){
         updateSubmit = true;
-        getRetData(i,url+id).then(data => {
+        getRetData(url+id).then(data => {
             Object.entries(data).forEach(([key, value]) => {
                 var element = document.getElementById(key);
                 if (element != null && element.getAttribute("type") !== "file") {

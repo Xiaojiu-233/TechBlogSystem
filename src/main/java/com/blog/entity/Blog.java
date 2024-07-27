@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 //博客
 @Data
-public class Blog implements MessageReact<Blog> {
+public class Blog implements MessageReact<Blog>  {
     private Long id;//id
 
     private Long userId;//用户id

@@ -113,9 +113,9 @@ public class CommentController {
     }
 
     //某博客的评论分页查询
-    @GetMapping("/blogpage")
+    @GetMapping("/blogpage/{id}")
     @ApiOperation(value = "某博客的评论分页查询", notes = "某博客的评论分页查询")
-    public R<Page> blogpage(int page, int pageSize, Long blogId){
+    public R<Page> blogpage(int page, int pageSize,@PathVariable("id") Long blogId){
         //正式执行
         log.info("正在进行分页查询 页数={} 页大小={} 查询博客id={}",page,pageSize,blogId);
         //返回结果

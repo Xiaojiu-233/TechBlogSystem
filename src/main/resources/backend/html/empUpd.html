@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>修改管理员信息</title>
+  <link  rel="stylesheet" th:href="@{/css/form.css}" href="../css/form.css"> <!-- 引用外部CSS文件 -->
+  <script th:src="@{/js/request.js}" src="../js/request.js"></script>
+  <script th:src="@{/js/request.js}" src="../js/form.js"></script>
+</head>
+<body>
+  <div class="header">
+    <button id="exitButton" onclick="back('emp')">退出</button>
+    <h1>修改管理员信息</h1>
+  </div>
+
+  <form id="InpForm">
+    <div class="input-row">
+      <label for="oldPwd">老密码:</label>
+      <input type="password" id="oldPwd" name="oldPwd">
+    </div>
+    <div class="input-row">
+      <label for="newPwd">新密码:</label>
+      <input type="password" id="newPwd" name="newPwd">
+    </div>
+
+    <input type="submit" value="提交" onclick="formSubmit_upd('/blog/emp/updPwd')">
+  </form>
+
+
+</body>
+</html>

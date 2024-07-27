@@ -49,13 +49,13 @@ function formSubmit_add(url){
 }
 function formSubmit_upd(url){
     //读取数据
-    idNum = Number(window.location.href.split('?')[1].split('=')[1]);
+    idNum = getParameterByName('eid');
     //提交
     const Form = document.getElementById('InpForm');
     let formData = new FormData(Form);
-    let jsonData = formDataToJson(formData);
-    jsonData['empId'] = idNum;
-    postJsonData(url,jsonData,function(){
+    let param = formDataToStr(formData);
+    param += '&empId='+idNum;
+    postJsonData(url+param,null,function(){
         location.reload();
     });
 

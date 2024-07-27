@@ -1,4 +1,4 @@
-body {
+/* body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
     margin: 0;
@@ -11,7 +11,7 @@ body {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-}
+} */
 
 .titleBox{
     display: flex;
@@ -105,7 +105,7 @@ body {
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
-    margin-left: 250px;
+    /* margin-left: 250px; */
 }
 
 .spot-message{
@@ -182,8 +182,8 @@ body {
   }
 
 .comments-section{
-    width: 350px;
-    height: 250px;
+    width: 600px;
+    height: 350px;
     background-color: #eaeaea;
     margin-bottom: 10px;
     overflow-y: auto;
@@ -200,6 +200,19 @@ body {
 .user-info {
     display: flex;
     align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    
+    .like-button{
+        margin:0;
+        padding:2px;
+    }
+}
+
+.comment-submit-box{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
 }
 
 .user-info img {
@@ -225,9 +238,14 @@ body {
     overflow-y: auto;
 }
 
+.comment-table {
+    padding-left: 20px;
+    padding-top:5px;
+}
+
 .comment-box{
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
 }
 
 .flex-box{
@@ -238,4 +256,45 @@ body {
 
 .actions{
     margin-top: 8px;
+
+
 }
+
+/* 分页器 */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .pagination li {
+    display: inline-block; 
+    margin-right: 5px;
+  }
+  
+  .pagination li a {
+    color: #000;
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    text-decoration: none;
+    border-radius: 3px;
+  }
+  
+  .pagination li.active a {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+  }
+  
+  .pagination li a:hover {
+    background-color: #33eeff;
+  }
