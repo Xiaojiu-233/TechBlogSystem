@@ -15,6 +15,7 @@ import com.blog.dao.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -64,7 +65,29 @@ public class UserSubController {
         //根据情况确定关注还是取消
         boolean success = isSub ? userSubService.remove(queryWrapper) : userSubService.save(userSub);
         //返回结果
-        return success ? R.success(!isSub ? "关注":"取消关注" + "成功") : R.failure(!isSub ? "关注":"取消关注" + "失败");
+        return success ? R.success((!isSub ? "关注":"取消关注") + "成功") : R.failure((!isSub ? "关注":"取消关注")  + "失败");
+    }
+
+    //查看关注&取消关注
+    @GetMapping("/check")
+    @ApiOperation(value = "关注&取消关注", notes = "用户权限")
+    public synchronized R<Boolean> checksub(Long subId){
+        //权限判定
+        if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
+            return R.failure("该操作需要用户来进行，你无权操作");
+        //正式执行
+        log.info("正在执行查看关注&取消关注操作: userId={} subId={}",BaseContext.getCurrentId(),subId);
+        //判定用户与博客是否存在
+        User user = userService.getById(BaseContext.getCurrentId());
+        if(user == null)return R.failure("关注处理失败，因为用户不存在");
+        User subU = userService.getById(subId);
+        if(subU == null)return R.failure("关注处理失败，因为关注的用户不存在");
+        //判定是否有关注
+        LambdaQueryWrapper<UserSub> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserSub::getUserId,BaseContext.getCurrentId()).eq(UserSub::getSubId,subId);
+        boolean isSub = userSubService.count(queryWrapper) > 0;
+        //返回结果
+        return R.success(isSub);
     }
 
     //////////数据处理//////////
@@ -84,15 +107,17 @@ public class UserSubController {
         if(searchFans != 0)subLambdaQueryWrapper.eq(UserSub::getSubId,userId);
         else subLambdaQueryWrapper.eq(UserSub::getUserId,userId);
         List<UserSub> ret = userSubService.list(subLambdaQueryWrapper);
-        List<Long> blogs = new ArrayList<>();
-        for(UserSub us : ret){blogs.add(us.getSubId());}
+        List<Long> uids = new ArrayList<>();
+        for(UserSub us : ret){uids.add(us.getSubId());}
 
         //构造分页构造器
         Page<User> pageInfo = new Page(page,pageSize);
+        //判定条件
+        if(uids.isEmpty())return R.success(pageInfo);
         //构造条件构造器
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
         //添加过滤条件
-        queryWrapper.in(User::getId,blogs);
+        queryWrapper.in(!uids.isEmpty() ,User::getId,uids);
         //添加排序条件
         queryWrapper.orderByDesc(User::getRegisterTime);
         //只检索简要信息

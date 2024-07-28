@@ -90,6 +90,8 @@ public class UserCollController {
 
         //构造分页构造器
         Page<Blog> pageInfo = new Page(page,pageSize);
+        //判定
+        if(blogs.size() == 0) return R.success(pageInfo);
         //构造条件构造器
         LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
         //添加过滤条件

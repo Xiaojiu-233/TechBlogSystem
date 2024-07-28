@@ -12,7 +12,7 @@ header {
   color: #fff;
   padding: 20px;
   text-align: center;
-  background-image: url('/img/title.png'); /* 更新为指定的图片路径 */
+  background-image: url('../img/title.png'); /* 更新为指定的图片路径 */
   background-size: cover;
   background-position: center;
   height: 130px;

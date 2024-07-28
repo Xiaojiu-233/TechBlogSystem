@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>Tech博客</title>
-  <script src="/js/request.js"></script>
-  <link rel="stylesheet" href="/css/index.css"> <!-- 引入CSS文件 -->
-  <script src="/js/index.js"></script> <!-- 引入JavaScript文件 -->
+  <link rel="stylesheet" th:href="@{/css/index.css}" href="../css/index.css"></link>
+  <script th:src="@{/js/request.js}" src="../js/request.js"></script>
+  <script th:src="@{/js/index.js}" src="../js/index.js"></script>
+
 </head>
 <body>
 
@@ -15,7 +16,7 @@
       <p>来找找有共同兴趣的朋友们吧！</p>
     </div>
     <div class="corner">
-      <img id="userImg" onerror="this.onerror=null;  this.src='/img/OIP.jpg';" src='${getImgUrl(rec.photos)}' alt="找不到图片" />
+      <img id="userImg" onerror="this.onerror=null;  this.src='./img/OIP.jpg';" src='${getImgUrl(rec.photos)}' alt="找不到图片" />
       <div id="empName" style="margin-right: 20px;">用户名</div>
       <a style="margin-right: 10px;" onclick="goBack()">登出</a>
     </div>

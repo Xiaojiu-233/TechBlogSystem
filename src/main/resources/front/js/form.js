@@ -10,9 +10,9 @@ function formSubmit_img(url,cate,img){
     let formData1 = new FormData(Form);
     if(fileInput.files.length == 0 ){
         if(updateSubmit){
-            formData1.set(cate.toLowerCase()+'Id', Id);
+            formData1.set('id', Id);
             formData1.set(img, ImgValue);
-            postData(url+'/update',formData1).then(data => {
+            postData(url+'/upd',formData1).then(data => {
                 alert(data);
             })
             return;
@@ -22,23 +22,25 @@ function formSubmit_img(url,cate,img){
         }
     }
 
+
     let formData2 = new FormData();
     formData2.append('file', fileInput.files[0]);
-    postData('/ts/common/upload/'+cate,formData2).then(data => {
-        formData1.set(img, '/ts/common/download/'+data);
+    postData('/blog/common/upload/'+cate,formData2).then(data => {
+        formData1.set(img, '/blog/common/download/'+data);
         if(updateSubmit){
-            formData1.set(cate.toLowerCase()+'Id', Id);
-            postData(url+'/update',formData1).then(data => {
+            formData1.set('id', Id);
+            postData(url+'/upd',formData1).then(data => {
                 alert(data);
             })
         }else{
             let jsonData = formDataToJson(formData1);
-            postJsonData(i,url,jsonData,function(){
+            postJsonData(url,jsonData,function(){
                 location.reload();
             });
         }
 
     });
+
 }
 function formSubmit_img2(url,cate,img){
     const Form = document.getElementById('InpForm');

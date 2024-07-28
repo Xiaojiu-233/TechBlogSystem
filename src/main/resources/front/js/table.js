@@ -31,7 +31,7 @@ async function SetPage(Url,curPage,pageSize,args,func){
   });
 
 }
-async function SetPage2(Url,curPage,pageSize,args,func){
+async function SetPage2(Url,curPage,pageSize,args,func,pageC){
   //请求数据处理
   var url = Url;
   url += `?page=${curPage}&pageSize=${pageSize}`
@@ -45,7 +45,7 @@ async function SetPage2(Url,curPage,pageSize,args,func){
     // 在这里处理返回的数据
     callFunction(func,data.records);
     //开始分页
-    $('#paginator-container2').bootstrapPaginator({
+    $('#paginator-container' + pageC).bootstrapPaginator({
       // 这里是你的配置选项
       currentPage: curPage,
       totalPages: Math.ceil(data.total / data.size),
@@ -147,6 +147,25 @@ function InputData_Blog(record){
   // 使用 innerHTML 插入复杂的内容
   myDiv.innerHTML = complexContent;
 }
+function InputData_Coll(record){
+  var complexContent = '';
+  // 开始渲染
+  for (var rec of record){
+    complexContent+= `
+    <div class="spot" onclick="window.location.href = './blogDetail.html?id=${rec.id}&li=${rec.likeNum}&share=${rec.share}&ls=${rec.likeState}&a=${rec.userName}'">
+      <img onerror="this.onerror=null;  this.src='/img/OIP.jpg';" src='${getImgUrl(rec.images)}' alt="找不到图片" />
+      <p class="hiddenText">${rec.title}</p>
+      作者：<a class="hiddenText" href="./userSpace.html?id=${rec.userId}">${rec.userName}</a>
+      <p>点赞：${rec.likeNum}</p>
+      <p>转发：${rec.share}</p>
+    </div>
+    `;
+  }
+  // 获取 div 元素
+  const myDiv = document.getElementById('coll-body');
+  // 使用 innerHTML 插入复杂的内容
+  myDiv.innerHTML = complexContent;
+}
 function InputData_LogSp(record){
   var complexContent = '';
   var uid = getId();
@@ -192,6 +211,26 @@ function InputData_Order(record){
   }
   // 获取 div 元素
   const myDiv = document.getElementById('order-body');
+  // 使用 innerHTML 插入复杂的内容
+  myDiv.innerHTML = complexContent;
+}
+function InputData_UserSub(record){
+  var complexContent = '';
+  // 开始渲染
+  for (var rec of record){
+    complexContent+= `
+    <tr>
+      <td>${rec.id}</td>
+      <td><a href="../../front/html/userSpace.html?id=${rec.id}">${rec.name}</a></td>
+      <td><img onerror="this.onerror=null;  this.src='../img/OIP.jpg';"
+       src="${getImgUrl(rec.headImg)}" alt="找不到图片" /></td>
+      <td>${rec.sex}</td>
+      <td class="flowTd">${rec.sign}</td>
+    </tr>
+    `;
+  }
+  // 获取 div 元素
+  const myDiv = document.getElementById('user-body');
   // 使用 innerHTML 插入复杂的内容
   myDiv.innerHTML = complexContent;
 }

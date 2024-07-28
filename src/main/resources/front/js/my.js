@@ -10,11 +10,11 @@ function showContent(contentId) {
     // 显示目标内容区域
     document.getElementById(contentId).style.display = "block";
 }
-function formSubmit_pwd(i,url){
+function formSubmit_pwd(url){
   const Form = document.getElementById('PwdForm');
   let formData = new FormData(Form);
-  formData.set('uid', Id);
-  postData(i,url,formData).then(data => {
+  formData.set('userId', Id);
+  postData(url,formData).then(data => {
     alert(data);
   })
 }
@@ -24,9 +24,9 @@ function getId(){
 
 //初始化
 showContent('profile-info');
-getRetData(2,'/ts/user/-1').then(data => {
+getRetData('/blog/user/-1').then(data => {
   console.log('获得数据:', data);
-  setUpdate(data.userId);
+  setUpdate(data.id);
   UserBody = data;
   Object.entries(data).forEach(([key, value]) => {
     //个人信息
@@ -34,8 +34,6 @@ getRetData(2,'/ts/user/-1').then(data => {
     if (element != null ) {
       if(key == 'headImg'){
         element.src = getImgUrl(value);
-      }else if(key == 'sex'){
-        element.innerHTML = value == 1 ? '女':'男';
       }else{
         element.innerHTML = value;
       }

@@ -28,8 +28,8 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         System.out.println("开始进行资源映射……");
         registry.addResourceHandler("doc.html").addResourceLocations("classpath:/META-INF/resources/");//
         registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
-        registry.addResourceHandler("/front/**").addResourceLocations("classpath:/blog/front/");
-        registry.addResourceHandler("/backend/**").addResourceLocations("classpath:/blog/backend/");
+        registry.addResourceHandler("/front/**").addResourceLocations("classpath:/front/");
+        registry.addResourceHandler("/backend/**").addResourceLocations("classpath:/backend/");
     }
 
     //扩展MVC框架的消息转换器

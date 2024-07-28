@@ -221,7 +221,7 @@ public class UserController {
     @PostMapping("/upd")
     @Transactional
     @ApiOperation(value = "修改指定id用户信息", notes = "修改自己的信息")
-    public R<String> updateById(@RequestBody User user){
+    public R<String> updateById( User user){
         //权限判定
         Long uid = user.getId();
         if(BaseContext.getIsAdmin() || !Objects.equals(BaseContext.getCurrentId(), uid))

@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/css/my.css">
-  <script src="/js/request.js"></script>
-  <script src="/js/form.js"></script>
+  <script th:src="@{/js/request.js}" src="../js/request.js"></script>
+  <script th:src="@{/js/form.js}" src="../js/form.js"></script>
+  <script th:src="@{/js/table.js}" src="../js/table.js"></script>
   <link  rel="stylesheet" th:href="@{/css/table.css}" href="../css/table.css"> <!-- 引用外部CSS文件 -->
   <link  th:href="@{/css/bootstrap.min.css}" href="../css/bootstrap.min.css">
   <script th:src="@{/js/jquery.min.js}" src="../js/jquery.min.js"></script>
   <script th:src="@{/js/bootstrap-paginator.min.js}" src="../js/bootstrap-paginator.min.js"></script>
-  <script th:src="@{/js/table.js}" src="../js/table.js"></script>
+  <link  rel="stylesheet" th:href="@{/css/my.css}" href="../css/my.css"> 
   <title>个人中心</title>
 </head>
 <body>
@@ -20,8 +20,8 @@
       <li><a onclick="showContent('profile-info') ">个人信息</a></li>
       <li><a onclick="showContent('change-form') ">修改信息</a></li>
       <li><a onclick="showContent('password-form') ">修改密码</a></li>
-      <li><a onclick="showContent('travel-list') ">查看个人博客</a></li>
-      <li><a onclick="showContent('order-list') ">查看个人订单</a></li>
+      <li><a onclick="showContent('blog-list') ">查看我的博客</a></li>
+      <li><a onclick="showContent('coll-list') ">查看我的收藏</a></li>
     </ul>
   </div>
 
@@ -37,12 +37,12 @@
             <span id="m_username"></span>
         </div>
         <div class="profile-info-unit">
-            <label for="m_userId">用户号:</label>
-            <span id="m_userId"></span>
+            <label for="m_id">用户号:</label>
+            <span id="m_id"></span>
         </div>
         <div class="profile-info-unit">
             <label for="m_headImg">头像:</label>
-            <img id="m_headImg" onerror="this.src='/img/OIP.jpg';" src='' alt="找不到图片" />
+            <img id="m_headImg" onerror="this.src='../../front/img/OIP.jpg';" src='' alt="找不到图片" />
         </div>
         <div class="profile-info-unit">
             <label for="m_age">年龄:</label>
@@ -57,12 +57,12 @@
             <span id="m_sex"></span>
         </div>
         <div class="profile-info-unit">
-            <label for="m_loginDate">登录时间:</label>
-            <span id="m_loginDate"></span>
+            <label for="m_loginTime">登录时间:</label>
+            <span id="m_loginTime"></span>
         </div>
         <div class="profile-info-unit">
-            <label for="m_registerDate">注册时间:</label>
-            <span id="m_registerDate"></span>
+            <label for="m_registerTime">注册时间:</label>
+            <span id="m_registerTime"></span>
         </div>
         <div class="profile-info-unit">
             <label for="m_sign">个性签名:</label>
@@ -100,93 +100,74 @@
               <textarea  id="sign" name="sign"></textarea>
             </div>
         
-            <input type="submit" value="提交" onclick="formSubmit_img(2,'/ts/user','User','headImg')">
+            <input type="submit" value="提交" onclick="formSubmit_img('/blog/user','User','headImg')">
           </form>
     </div>
     
     <div id="password-form" class="password-form  content-section">
         <form id="PwdForm" class="my-form-info">
             <div class="input-row">
-              <label for="password">旧密码:</label>
-              <input type="password" id="password" name="password">
+              <label for="oldPwd">旧密码:</label>
+              <input type="password" id="oldPwd" name="oldPwd">
             </div>
             <div class="input-row">
-                <label for="new_password">新密码:</label>
-                <input type="password" id="new_password" name="new_password">
+                <label for="newPwd">新密码:</label>
+                <input type="password" id="newPwd" name="newPwd">
               </div>  
         
-            <input type="submit" value="提交" onclick="formSubmit_pwd(2,'/ts/user/pwd')">
+            <input type="submit" value="提交" onclick="formSubmit_pwd('/blog/user/updPwd')">
           </form>
     </div>
     
-    <div id="travel-list" class="travel-list  content-section">
+    <div id="blog-list" class="blog-list  content-section">
         <div class="container">
             <div class="toolbar">
               <div class="title-left">
                 <h2>博客</h2>
               </div>
               <div class="title-right">
-                <input type="text" id="search-logName" placeholder="标题搜索">
-                <button id="searchBtn2" onclick="SetPage2(2,'/ts/touristLog/userpage',1,20,['logName'],'InputData_LogSp')">搜索</button>
+                <input type="text" id="search-title" placeholder="标题搜索">
+                <button id="searchBtn2" onclick="SetPage2('/blog/blog/userpage',1,20,['title'],'InputData_Blog',2)">搜索</button>
               </div>
             </div>
           
-            <div id="log-body" class="grid">
+            <div id="blog-body" class="grid">
             </div>
           
               <div id="paginator-container2"></div>
-            </div>
+        </div>
           
             <script>
-              SetPage2(2,'/ts/touristLog/userpage',1,20,[],'InputData_LogSp');
+              SetPage2('/blog/blog/userpage',1,20,[],'InputData_Blog',2);
             </script>
             
           </div>
-    </div>
 
-    <div id="order-list" class="order-list  content-section">
-        <div class="container" style="margin-left: 250px; width: 1200px;">
-            <div class="toolbar">
-              <div class="title-left">
-                <h2>订单管理</h2>
-              </div>
-              <div class="title-right">
-                <input type="text" id="search-spotId" placeholder="景点号搜索">
-                <input type="text" id="search-hotelId" placeholder="酒店号搜索">
-                <button id="searchBtn" onclick="SetPage(2,'/ts/order/page',1,10,['spotId','hotelId'],'InputData_Order')">搜索</button>
-              </div>
-            </div>
-          
-            <div class="pagination-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>订单编号</th>
-                    <th>景点编号</th>
-                    <th>酒店编号</th>
-                    <th>订单总价格</th>
-                    <th>创建时间</th>
-                    <th>状态</th>
-                    <th>票数</th>
-                    <th>酒店房间数</th>
-                  </tr>
-                </thead>
-                <tbody id="order-body">
-                </tbody>
-              </table>
-          
-              <div id="paginator-container"></div>
-            </div>
-          
-            <script>
-              SetPage(2,'/ts/order/page',1,10,['spotId','hotelId'],'InputData_Order');
-            </script>
-            
+    <div id="coll-list" class="coll-list  content-section">
+      <div class="container">
+        <div class="toolbar">
+          <div class="title-left">
+            <h2>收藏</h2>
           </div>
+          <div class="title-right">
+          </div>
+        </div>
+      
+        <div id="coll-body" class="grid">
+        </div>
+      
+          <div id="paginator-container3"></div>
+        </div>
+      
+        <script>
+          SetPage2('/blog/userColl/userpage',1,20,[],'InputData_Coll',3);
+        </script>
+        
+      </div>
     </div>
 
   </div>
-  <script src="/js/my.js"></script>
+  <script th:src="@{/js/my.js}" src="../js/my.js"></script>
 
 </body>
 </html>

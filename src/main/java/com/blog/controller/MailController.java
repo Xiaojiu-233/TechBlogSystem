@@ -50,15 +50,13 @@ public class MailController {
 
     //邮件的本用户分页查询(可以通过邮件标题模糊查询)
     @GetMapping("/userpage")
-    @ApiOperation(value = "邮件的本用户分页查询", notes = "查看自己的邮件，可以通过邮件标题模糊查询")
-    public R<Page> userpage(int page, int pageSize, String title){
+    @ApiOperation(value = "邮件的本用户查询", notes = "查看自己的邮件，可以通过邮件标题模糊查询")
+    public R<List<Mail>> userpage(String title){
         //权限判定
         if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要用户来进行，你无权操作");
         //正式执行
-        log.info("正在进行分页查询 页数={} 页大小={} 查询邮件名={}",page,pageSize,title);
-        //构造分页构造器
-        Page<Mail> pageInfo = new Page(page,pageSize);
+        log.info("正在进行查询 查询邮件名={}",title);
 
         //构造条件构造器
         LambdaQueryWrapper<Mail> queryWrapper = new LambdaQueryWrapper<>();
@@ -68,24 +66,20 @@ public class MailController {
         queryWrapper.select(Mail::getId,Mail::getCreateTime,Mail::getTitle,Mail::getFromName,Mail::getFromId,Mail::getIsRead,Mail::getUserId);
         //添加排序条件
         queryWrapper.orderByDesc(Mail::getCreateTime);
-        //分页查询，结果返回给pageInfo
-        mailService.page(pageInfo,queryWrapper);
 
         //返回结果
-        return R.success(pageInfo);
+        return R.success(mailService.list(queryWrapper));
     }
 
     //读取自己的通知邮件
     @GetMapping("/noticepage")
-    @ApiOperation(value = "邮件的分页查询(通知邮件)", notes = "查看自己的邮件，可以通过邮件标题模糊查询")
-    public R<Page> noticepage(int page, int pageSize, String title){
+    @ApiOperation(value = "邮件的查询(通知邮件)", notes = "查看自己的邮件，可以通过邮件标题模糊查询")
+    public R<List<Mail>> noticepage( String title){
         //权限判定
         if(BaseContext.getIsAdmin() || BaseContext.getCurrentId() == null)
             return R.failure("该操作需要用户来进行，你无权操作");
         //正式执行
-        log.info("正在进行分页查询 页数={} 页大小={} 查询邮件名={}",page,pageSize,title);
-        //构造分页构造器
-        Page<Mail> pageInfo = new Page(page,pageSize);
+        log.info("正在进行查询 查询邮件名={}",title);
 
         //构造条件构造器
         LambdaQueryWrapper<Mail> queryWrapper = new LambdaQueryWrapper<>();
@@ -99,11 +93,9 @@ public class MailController {
         queryWrapper.select(Mail::getId,Mail::getCreateTime,Mail::getTitle,Mail::getFromName,Mail::getFromId,Mail::getIsRead,Mail::getUserId);
         //添加排序条件
         queryWrapper.orderByDesc(Mail::getCreateTime);
-        //分页查询，结果返回给pageInfo
-        mailService.page(pageInfo,queryWrapper);
 
         //返回结果
-        return R.success(pageInfo);
+        return R.success(mailService.list(queryWrapper));
     }
 
     //读取通知邮件
@@ -144,9 +136,11 @@ public class MailController {
         //排除异常情况
         if(mail==null)return R.failure("邮件查询失败");
         //用户权限，邮件会设置为已读，如果是通知邮件(userId = null)则添加已读信息到NoticeCheck表中
-        if(!BaseContext.getIsAdmin() && BaseContext.getCurrentId() == null){
+        if(!BaseContext.getIsAdmin() && BaseContext.getCurrentId() != null){
             if(mail.getUserId() == null){
-                noticeCheckService.save(new NoticeCheck(BaseContext.getCurrentId(),mail.getId()));
+                boolean exist = noticeCheckService.count(new LambdaQueryWrapper<NoticeCheck>()
+                        .eq(NoticeCheck::getUserId,BaseContext.getCurrentId()).eq(NoticeCheck::getCheckMail,mail.getId())) > 0;
+                if(!exist) noticeCheckService.save(new NoticeCheck(BaseContext.getCurrentId(),mail.getId()));
             }else{
                 mail.setIsRead(1);
                 mailService.updateById(mail);
@@ -250,6 +244,7 @@ public class MailController {
         //读取邮件数
         LambdaQueryWrapper<Mail> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Mail::getUserId,uid);
+        queryWrapper.eq(Mail::getIsRead,0);
         count = mailService.count(queryWrapper);
         //返回结果
         return count > -1 ? R.success(count) : R.failure("邮件数量读取失败");
