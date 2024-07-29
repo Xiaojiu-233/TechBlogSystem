@@ -1,0 +1,3 @@
+点击sql导入数据库
+
+BlogSystemData放D盘（这是默认情况，如果有需要可以修改项目的application.yml的自定义配置）
